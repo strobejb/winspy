@@ -1,0 +1,54 @@
+WinSpy++ Version History
+--------------------------
+
+Version 1.7.1 - May 2007 (Current Version)
+* BUG FIXES *
+- Moved 'winspy' system-menu items to appear before the Close item
+- Fixed 'resolve' window procedure hyperlink
+
+Version 1.7 - Jun 2006 
+* NEW FEATURES *
+- Finally supports XP and Vista themes
+- Window-hierarchy now groups windows for each process
+- Static text-labels changed to read-only edit-boxes
+
+* BUG FIXES *
+- Fixed resize issue on first invokation
+
+Version 1.6 - Apr 2003
+* NEW FEATURES *
+- Multi monitor support
+- Changed dialog font to "MS Shell Dlg"
+
+* BUG FIXES *
+- Now runs properly under Win9x
+
+Version 1.5 - Jan 2002 
+* NEW FEATURES *
+- Can select ANY window in the system
+- Improved user interface.
+- Full window dragging
+- Added accelerator keys
+- Added options dialog
+- Preserves settings through registry
+- Pin window to side of screen
+- Added Process tab - moved Scrollbar data to Properties tab
+- Show/Hide/Enable/Disable/Close any window
+- Modify window's caption
+- Modify window styles
+- Move/Size windows
+- Retrieve password text from password protected text-boxes
+- Close/Terminate processes
+- Can now toggle layout/show/hide main-window whilst selecting
+- Added Refresh, Locate and Flash buttons to window-tree
+- Added control icons to window tree.
+ 
+* BUG FIXES *
+- Fixed small style decoding problem (occurred in a few places)
+- Main window now sizes properly according to window settings
+
+Version 1.1 - 1.4
+- Unreleased interim versions
+
+Version 1.0 - Apr 2001
+* INITIAL RELEASE *

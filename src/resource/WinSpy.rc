@@ -1,0 +1,583 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_TAB_GENERAL DIALOGEX 0, 0, 230, 170
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "H&andle:",IDC_STATIC,7,9,26,8
+    EDITTEXT        IDC_HANDLE,70,7,136,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "",IDC_HANDLE_MENU,209,7,14,12
+    LTEXT           "Caption:",IDC_STATIC,7,25,27,8
+    EDITTEXT        IDC_CAPTION1,70,23,136,13,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SETCAPTION,"Button",BS_OWNERDRAW | BS_ICON | BS_CENTER | BS_VCENTER | WS_TABSTOP,209,23,14,12
+    LTEXT           "Class:",IDC_STATIC,7,42,25,8
+    EDITTEXT        IDC_CLASS,70,42,136,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Style:",IDC_STATIC,7,54,18,8
+    EDITTEXT        IDC_STYLE,70,54,136,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Rectangle:",IDC_STATIC,7,68,36,8
+    EDITTEXT        IDC_RECTANGLE,70,68,136,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    CONTROL         "",IDC_EDITSIZE,"Button",BS_OWNERDRAW | BS_ICON | BS_CENTER | BS_VCENTER | WS_TABSTOP,209,66,14,12
+    LTEXT           "Client Rect:",IDC_STATIC,7,80,38,8
+    EDITTEXT        IDC_CLIENTRECT,70,80,136,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Window Proc:",IDC_STATIC,7,94,46,8
+    LTEXT           "N/A",IDC_WINDOWPROC,72,94,134,8,NOT WS_VISIBLE,WS_EX_TRANSPARENT
+    EDITTEXT        IDC_WINDOWPROC2,70,94,136,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE | NOT WS_BORDER
+    LTEXT           "Instance Handle:",IDC_STATIC,7,106,55,8
+    EDITTEXT        IDC_INSTANCE,70,106,64,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Control ID:",IDC_STATIC,7,120,42,8
+    EDITTEXT        IDC_CONTROLID,70,120,64,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "User Data:",IDC_STATIC,7,132,39,8
+    EDITTEXT        IDC_USERDATA,70,132,64,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Window Bytes:",IDC_STATIC,7,148,48,8
+    COMBOBOX        IDC_WINDOWBYTES,70,146,136,56,CBS_DROPDOWNLIST | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CAPTION2,70,23,136,63,CBS_DROPDOWN | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_TAB_STYLES DIALOGEX 0, 0, 230, 175
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "&Window Styles:",IDC_STATIC,7,7,60,8
+    EDITTEXT        IDC_STYLE,74,7,59,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    CONTROL         "",IDC_EDITSTYLE,"Button",BS_OWNERDRAW | BS_ICON | BS_CENTER | BS_VCENTER | WS_TABSTOP,208,5,14,10
+    LISTBOX         IDC_LIST1,7,17,216,66,LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Extended Styles:",IDC_STATIC,7,90,60,8
+    EDITTEXT        IDC_STYLEEX,74,90,63,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    CONTROL         "",IDC_EDITSTYLEEX,"Button",BS_OWNERDRAW | BS_ICON | WS_TABSTOP,208,88,14,10
+    LISTBOX         IDC_LIST2,7,100,216,66,LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_TAB_PROPERTIES DIALOGEX 0, 0, 230, 175
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,7,7,216,64
+    LTEXT           "Window Properties are entries stored in a window's property list, by using the SetProp API call.",IDC_STATIC,7,74,216,21
+    GROUPBOX        "Horizontal Scrollbar",IDC_STATIC,7,98,104,70,0,WS_EX_TRANSPARENT
+    LTEXT           "Minimum:",IDC_STATIC,15,121,30,8
+    LTEXT           "Maximum:",IDC_STATIC,15,132,32,8
+    LTEXT           "Position:",IDC_STATIC,15,143,28,8
+    LTEXT           "Page Size:",IDC_STATIC,15,154,35,8
+    GROUPBOX        "Vertical Scrollbar",IDC_STATIC,117,98,106,70,0,WS_EX_TRANSPARENT
+    LTEXT           "Minimum:",IDC_STATIC,126,121,30,8
+    LTEXT           "Maximum:",IDC_STATIC,126,132,32,8
+    LTEXT           "Position:",IDC_STATIC,126,143,28,8
+    LTEXT           "Page Size:",IDC_STATIC,126,154,35,8
+    LTEXT           "State:",IDC_STATIC,15,110,20,8
+    LTEXT           "State:",IDC_STATIC,126,110,20,8
+    EDITTEXT        IDC_HSTATE,50,110,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_HMIN,50,121,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_HMAX,50,132,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_HPOS,50,143,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_HPAGE,50,154,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_VSTATE,160,110,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_VMIN,160,121,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_VMAX,160,132,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_VPOS,160,143,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_VPAGE,160,154,50,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+END
+
+IDD_TAB_CLASS DIALOGEX 0, 0, 230, 170
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Class Name:",IDC_STATIC,7,10,40,8
+    EDITTEXT        IDC_CLASSNAME,70,7,152,13,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Class Styles:",IDC_STATIC,7,28,48,8
+    EDITTEXT        IDC_STYLE,70,28,40,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    COMBOBOX        IDC_STYLELIST,114,26,108,63,CBS_DROPDOWNLIST | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Class Bytes:",IDC_STATIC,7,44,45,8
+    EDITTEXT        IDC_CLASSBYTES,70,44,39,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    COMBOBOX        IDC_BYTESLIST,114,41,108,54,CBS_DROPDOWNLIST | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Class Atom:",IDC_STATIC,7,60,38,8
+    EDITTEXT        IDC_ATOM,70,60,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Window Bytes:",IDC_STATIC,7,72,48,8
+    EDITTEXT        IDC_WINDOWBYTES,70,72,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Menu Handle:",IDC_STATIC,7,84,46,8
+    EDITTEXT        IDC_MENUHANDLE,70,84,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Icon Handle:",IDC_STATIC,7,96,42,8
+    EDITTEXT        IDC_ICONHANDLE,70,96,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Cursor Handle:",IDC_STATIC,7,108,48,8
+    EDITTEXT        IDC_CURSORHANDLE,70,108,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Bkgnd Brush:",IDC_STATIC,7,120,44,8
+    EDITTEXT        IDC_BKGNDBRUSH,70,120,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Instance Handle:",IDC_STATIC,7,132,55,8
+    EDITTEXT        IDC_INSTANCEHANDLE,70,132,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Window Proc:",IDC_STATIC,7,144,46,8
+    EDITTEXT        IDC_WNDPROC,70,144,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "Class Proc:",IDC_STATIC,7,156,36,8
+    EDITTEXT        IDC_CLASSPROC,70,156,152,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+END
+
+IDD_TAB_WINDOWS DIALOGEX 0, 0, 230, 175
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Child Windows:",IDC_STATIC,7,7,50,8
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,7,17,216,64
+    LTEXT           "Sibling Windows:",IDC_STATIC,7,86,55,8
+    CONTROL         "List1",IDC_LIST2,"SysListView32",LVS_REPORT | LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,7,96,216,58
+    LTEXT           "Parent Window:",IDC_STATIC,7,158,52,8
+    LTEXT           "00000000",IDC_PARENT,63,158,45,8,SS_NOTIFY
+    LTEXT           "Owner Window:",IDC_STATIC,119,158,52,8
+    CONTROL         "00000000",IDC_OWNER,"Static",SS_LEFTNOWORDWRAP | SS_NOTIFY | WS_GROUP,175,158,45,8
+END
+
+IDD_TAB_SCROLLBARS DIALOGEX 0, 0, 230, 170
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Horizontal Scrollbar",IDC_STATIC,7,5,216,76
+    LTEXT           "State:",IDC_STATIC,15,18,20,8
+    LTEXT           "",IDC_HSTATE,78,18,128,8
+    LTEXT           "Minimum:",IDC_STATIC,15,30,30,8
+    LTEXT           "",IDC_HMIN,78,30,128,8
+    LTEXT           "Maximum:",IDC_STATIC,15,42,32,8
+    LTEXT           "",IDC_HMAX,78,42,128,8
+    LTEXT           "Thumb Position:",IDC_STATIC,15,54,52,8
+    LTEXT           "",IDC_HPOS,78,54,127,8
+    LTEXT           "Page Size:",IDC_STATIC,15,66,35,8
+    LTEXT           "",IDC_HPAGE,78,66,128,8
+    GROUPBOX        "Vertical Scrollbar",IDC_STATIC,7,87,216,76
+    LTEXT           "State:",IDC_STATIC,15,100,20,8
+    LTEXT           "",IDC_VSTATE,78,100,128,8
+    LTEXT           "Minimum:",IDC_STATIC,15,112,30,8
+    LTEXT           "",IDC_VMIN,78,112,128,8
+    LTEXT           "Maximum:",IDC_STATIC,15,124,32,8
+    LTEXT           "",IDC_VMAX,78,124,128,8
+    LTEXT           "Thumb Position:",IDC_STATIC,15,136,52,8
+    LTEXT           "",IDC_VPOS,78,136,128,8
+    LTEXT           "Page Size:",IDC_STATIC,15,148,35,8
+    LTEXT           "",IDC_VPAGE,78,148,128,8
+END
+
+IDD_MAIN DIALOGEX 0, 0, 434, 251
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "WinSpy++"
+CLASS "WinSpy"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         103,IDC_DRAGGER,"Static",SS_BITMAP | SS_NOTIFY,7,5,21,17
+    LTEXT           "Drag the Finder Tool over a window to select it, then release the mouse",IDC_STATIC,36,6,121,18
+    CONTROL         "&Hidden Windows",IDC_HIDDEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,3,70,10
+    CONTROL         "Minimi&ze WinSpy++",IDC_MINIMIZE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,14,77,10
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",TCS_RAGGEDRIGHT | WS_TABSTOP,7,31,242,191
+    CONTROL         "Tree1",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,261,55,46,55,WS_EX_CLIENTEDGE
+    CONTROL         "Tab2",IDC_TAB2,"SysTabControl32",TCS_FOCUSNEVER,258,4,64,44
+    PUSHBUTTON      "&Capture",IDC_CAPTURE,7,230,50,14
+    DEFPUSHBUTTON   "Close",IDOK,65,230,50,14
+    PUSHBUTTON      "&More",IDC_EXPAND,197,230,50,14
+    PUSHBUTTON      "&Refresh",IDC_REFRESH,258,230,50,14,BS_CENTER | BS_VCENTER
+    PUSHBUTTON      "&Locate",IDC_LOCATE,316,230,50,14
+    PUSHBUTTON      "&Flash",IDC_FLASH,374,230,50,14
+END
+
+IDD_STYLE_EDIT DIALOGEX 0, 0, 250, 133
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "Window Style Editor"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "&Style DWORD:",IDC_STATIC,7,7,58,8
+    EDITTEXT        IDC_EDIT1,7,16,170,14,ES_AUTOHSCROLL
+    LTEXT           "&Select one or more styles:",IDC_STATIC,7,37,100,8
+    LISTBOX         IDC_LIST1,7,47,170,79,LBS_MULTIPLESEL | LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "&Apply",IDC_APPLY,193,7,50,14
+    PUSHBUTTON      "Close",IDCANCEL,193,24,50,14
+    PUSHBUTTON      "&Clear",IDC_CLEAR,193,47,50,14
+    CONTROL         103,IDC_DRAGGER,"Static",SS_BITMAP | SS_NOTIFY,207,100,21,17
+    GROUPBOX        "Copy Style",IDC_STATIC,193,86,50,39,BS_CENTER
+END
+
+IDD_OPTIONS DIALOGEX 0, 0, 221, 153
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "WinSpy++ Options"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "General Settings",IDC_STATIC,7,7,146,64
+    CONTROL         "&Remember last position",IDC_OPTIONS_SAVEPOS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,21,103,10
+    CONTROL         "&Display window data in caption",IDC_OPTIONS_SHOWINCAPTION,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,32,113,10
+    GROUPBOX        "Window List Settings",IDC_STATIC,7,82,146,64
+    CONTROL         "&Show hidden windows grayed-out",IDC_OPTIONS_SHOWHIDDEN,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,95,122,10
+    CONTROL         "Include &window handles",IDC_OPTIONS_INCHANDLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,106,92,10
+    CONTROL         "Include &class name",IDC_OPTIONS_INCCLASS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,118,77,10
+    DEFPUSHBUTTON   "OK",IDOK,164,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,164,24,50,14
+    CONTROL         "&Full window dragging",IDC_OPTIONS_FULLDRAG,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,43,82,10
+    CONTROL         "Show class then caption",IDC_OPTIONS_DIR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,129,119,10
+    CONTROL         "&Enable Tool-Tips",IDC_OPTIONS_TOOLTIPS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,54,69,10
+END
+
+IDD_ADJUSTWINPOS DIALOGEX 0, 0, 205, 77
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "Adjust Window Position"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Position",IDC_STATIC,7,7,128,63
+    LTEXT           "&X:",IDC_STATIC,16,28,8,8
+    EDITTEXT        IDC_EDITX,26,25,40,13,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPINX,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,63,25,9,14
+    LTEXT           "&Y:",IDC_STATIC,72,28,8,8
+    EDITTEXT        IDC_EDITY,82,25,40,13,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPINY,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,123,25,9,14
+    LTEXT           "&W:",IDC_STATIC,15,50,10,8
+    EDITTEXT        IDC_EDITW,26,47,40,13,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPINW,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,63,46,9,14
+    LTEXT           "&H:",IDC_STATIC,72,50,8,8
+    EDITTEXT        IDC_EDITH,82,47,40,13,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPINH,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,122,46,9,14
+    DEFPUSHBUTTON   "&Adjust",IDC_ADJUST,148,7,50,14
+    PUSHBUTTON      "Close",IDCANCEL,148,24,50,14
+    PUSHBUTTON      "&Reset",IDC_RESET,148,55,50,14
+END
+
+IDD_TAB_PROCESS DIALOGEX 0, 0, 230, 170
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "&Module Name:",IDC_STATIC,7,9,47,8
+    EDITTEXT        IDC_PROCESSNAME,70,7,136,13,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "&Process Id:",IDC_STATIC,7,44,36,8
+    EDITTEXT        IDC_PID,70,44,70,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    LTEXT           "&Thread Id:",IDC_STATIC,7,56,34,8
+    EDITTEXT        IDC_TID,70,56,70,8,ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+    PUSHBUTTON      "",IDC_PROCESS_MENU,209,7,14,12
+    LTEXT           "&Module Path:",IDC_STATIC,7,25,43,8
+    EDITTEXT        IDC_PROCESSPATH,70,23,136,13,ES_AUTOHSCROLL | ES_READONLY
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_TAB_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_TAB_STYLES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
+    END
+
+    IDD_TAB_PROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
+    END
+
+    IDD_TAB_CLASS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 222
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 164
+    END
+
+    IDD_TAB_WINDOWS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
+    END
+
+    IDD_TAB_SCROLLBARS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_MAIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 427
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 244
+    END
+
+    IDD_STYLE_EDIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 243
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 126
+    END
+
+    IDD_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 214
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 146
+    END
+
+    IDD_ADJUSTWINPOS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 198
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 70
+    END
+
+    IDD_TAB_PROCESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_DRAGTOOL1           BITMAP                  "bitmap1.bmp"
+IDB_WINDOW_INVISIBLE    BITMAP                  "bitmap6.bmp"
+IDB_DRAGTOOL2           BITMAP                  "bitmap2.bmp"
+IDB_WINDOW_VISIBLE      BITMAP                  "bitmap5.bmp"
+IDB_CHECK1              BITMAP                  "bitmap3.bmp"
+IDB_CHECK2              BITMAP                  "bitmap4.bmp"
+IDB_PIN_BITMAP          BITMAP                  "bitmap7.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_CURSOR1             CURSOR                  "cursor1.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "icon1.ico"
+IDI_ICON5               ICON                    "icon2.ico"
+IDI_ICON10              ICON                    "icon3.ico"
+IDI_ICON17              ICON                    "icon4.ico"
+IDI_ICON16              ICON                    "icon5.ico"
+IDI_ICON18              ICON                    "icon6.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU2 MENU 
+BEGIN
+    POPUP "Window"
+    BEGIN
+        MENUITEM "&Visible",                    IDM_POPUP_VISIBLE, CHECKED
+        MENUITEM "&Enabled",                    IDM_POPUP_ENABLED
+        MENUITEM "&Always On Top",              IDM_POPUP_ONTOP
+        MENUITEM SEPARATOR
+        MENUITEM "&Bring To Front",             IDM_POPUP_TOFRONT
+        MENUITEM "&Send To Back",               IDM_POPUP_TOBACK
+        MENUITEM SEPARATOR
+        MENUITEM "&Close Window",               IDM_POPUP_CLOSE
+    END
+END
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "Process"
+    BEGIN
+        MENUITEM "&End Process (safe)",         IDM_WINSPY_POSTQUIT
+        MENUITEM "&Terminate!",                 IDM_WINSPY_TERMINATE
+        MENUITEM SEPARATOR
+        MENUITEM "&Locate Executable",          IDM_WINSPY_FINDEXE
+    END
+END
+
+IDR_MENU3 MENU 
+BEGIN
+    POPUP "Window"
+    BEGIN
+        MENUITEM "&Visible",                    IDM_POPUP_VISIBLE, CHECKED
+        MENUITEM "&Enabled",                    IDM_POPUP_ENABLED
+        MENUITEM "&Always On Top",              IDM_POPUP_ONTOP
+        MENUITEM SEPARATOR
+        MENUITEM "Capture to Clip&board",       IDM_POPUP_COPY
+        MENUITEM "&Adjust Position...",         IDM_POPUP_SETPOS
+        MENUITEM SEPARATOR
+        MENUITEM "&Bring To Front",             IDM_POPUP_TOFRONT
+        MENUITEM "&Send To Back",               IDM_POPUP_TOBACK
+        MENUITEM SEPARATOR
+        MENUITEM "&Close Window",               IDM_POPUP_CLOSE
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCELERATOR1 ACCELERATORS 
+BEGIN
+    "1",            IDM_WINSPY_GENERAL,     VIRTKEY, ALT, NOINVERT
+    "2",            IDM_WINSPY_STYLES,      VIRTKEY, ALT, NOINVERT
+    "3",            IDM_WINSPY_PROPERTIES,  VIRTKEY, ALT, NOINVERT
+    "4",            IDM_WINSPY_CLASS,       VIRTKEY, ALT, NOINVERT
+    "5",            IDM_WINSPY_WINDOWS,     VIRTKEY, ALT, NOINVERT
+    "6",            IDM_WINSPY_SCROLLBARS,  VIRTKEY, ALT, NOINVERT
+    VK_F1,          IDM_WINSPY_HELP,        VIRTKEY, NOINVERT
+    VK_F10,         IDM_WINSPY_ZOOMBL,      VIRTKEY, NOINVERT
+    VK_F11,         IDM_WINSPY_ZOOMBR,      VIRTKEY, NOINVERT
+    VK_F12,         IDM_WINSPY_ZOOMTR,      VIRTKEY, NOINVERT
+    VK_F2,          IDM_WINSPY_TOGGLE,      VIRTKEY, NOINVERT
+    VK_F3,          IDM_WINSPY_TOGGLEEXP,   VIRTKEY, NOINVERT
+    VK_F4,          IDM_WINSPY_PIN,         VIRTKEY, NOINVERT
+    VK_F5,          IDM_WINSPY_REFRESH,     VIRTKEY, NOINVERT
+    VK_F6,          IDC_REFRESH,            VIRTKEY, NOINVERT
+    VK_F9,          IDM_WINSPY_ZOOMTL,      VIRTKEY, NOINVERT
+    VK_RETURN,      IDM_WINSPY_OPTIONS,     VIRTKEY, ALT, NOINVERT
+    "Y",            IDM_WINSPY_ONTOP,       VIRTKEY, SHIFT, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,7,1,0
+ PRODUCTVERSION 1,7,1,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "CompanyName", "Catch22 Productions"
+            VALUE "FileDescription", "WinSpy"
+            VALUE "FileVersion", "1, 7, 1, 0"
+            VALUE "InternalName", "WinSpy"
+            VALUE "LegalCopyright", "Copyright © 2007 Catch22 Productions"
+            VALUE "OriginalFilename", "WinSpy.exe"
+            VALUE "ProductName", "  WinSpy"
+            VALUE "ProductVersion", "1, 7, 1, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+1                       RT_MANIFEST             "winspy.exe.manifest"
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

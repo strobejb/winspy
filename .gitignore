@@ -1,0 +1,23 @@
+*.aps
+*.res
+*.ncb
+*.obj
+*.lib
+BuildLog.htm
+*.suo
+*.exe
+*.idb
+*.pdb
+*.map
+*.bsc
+*.user
+*.sbr
+*.cache
+*.zip
+
+# ignore the following directories - they can occur
+# anywhere under the repo
+Unicode_Debug/
+Unicode_Release/
+Debug/
+Release/
