@@ -14,13 +14,56 @@
 
 #include <windows.h>
 #include <tchar.h>
+#include <psapi.h>
 
 #include "WinSpy.h"
 #include "resource.h"
 
+#include <tlhelp32.h>
+
+
 typedef BOOL  (WINAPI * EnumProcessModulesProc )(HANDLE, HMODULE *, DWORD, LPDWORD);
 typedef DWORD (WINAPI * GetModuleBaseNameProc  )(HANDLE, HMODULE, LPTSTR, DWORD);
 typedef DWORD (WINAPI * GetModuleFileNameExProc)(HANDLE, HMODULE, LPTSTR, DWORD);
+
+BOOL GetProcessNameByPid(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCHAR szPath[], DWORD nPathSize)
+{
+	HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	PROCESSENTRY32 pe = { sizeof(pe) };
+	BOOL fFound = FALSE;
+
+	szPath[0] = '\0';
+	szName[0] = '\0';
+
+	if(Process32First(h, &pe))
+	{
+		do
+		{
+			if(pe.th32ProcessID == dwProcessId)
+			{
+				if(szName)
+				{
+					lstrcpyn(szName, pe.szExeFile, nNameSize);
+				}
+
+				if(szPath)
+				{
+					//OpenProcess(
+					lstrcpyn(szPath, pe.szExeFile, nPathSize);
+				}
+
+				fFound = TRUE;
+				break;
+			}
+		}
+		while(Process32Next(h, &pe));
+	}
+
+	CloseHandle(h);
+
+	return fFound;
+}
+
 
 //
 // This uses PSAPI.DLL, which is only available under NT/2000/XP I think,
@@ -32,7 +75,7 @@ typedef DWORD (WINAPI * GetModuleFileNameExProc)(HANDLE, HMODULE, LPTSTR, DWORD)
 //  szPath       [out]
 //  nPathSize    [in]	
 //
-BOOL GetProcessNameByPid(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCHAR szPath[], DWORD nPathSize)
+BOOL GetProcessNameByPid0(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCHAR szPath[], DWORD nPathSize)
 {
 	HMODULE hPSAPI;
 	HANDLE hProcess;
