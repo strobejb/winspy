@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
+// English (United Kingdom) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -290,7 +288,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_TAB_GENERAL, DIALOG
     BEGIN
@@ -448,7 +446,7 @@ IDI_ICON18              ICON                    "icon6.ico"
 // Menu
 //
 
-IDR_MENU2 MENU 
+IDR_MENU2 MENU
 BEGIN
     POPUP "Window"
     BEGIN
@@ -463,7 +461,7 @@ BEGIN
     END
 END
 
-IDR_MENU1 MENU 
+IDR_MENU1 MENU
 BEGIN
     POPUP "Process"
     BEGIN
@@ -474,7 +472,7 @@ BEGIN
     END
 END
 
-IDR_MENU3 MENU 
+IDR_MENU3 MENU
 BEGIN
     POPUP "Window"
     BEGIN
@@ -498,7 +496,7 @@ END
 // Accelerator
 //
 
-IDR_ACCELERATOR1 ACCELERATORS 
+IDR_ACCELERATOR1 ACCELERATORS
 BEGIN
     "1",            IDM_WINSPY_GENERAL,     VIRTKEY, ALT, NOINVERT
     "2",            IDM_WINSPY_STYLES,      VIRTKEY, ALT, NOINVERT
@@ -565,7 +563,6 @@ END
 // RT_MANIFEST
 //
 
-1                       RT_MANIFEST             "winspy.exe.manifest"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -573,7 +570,7 @@ END
 //
 
 IDB_SELBOX              PNG                     "selbox.png"
-#endif    // English (U.K.) resources
+#endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

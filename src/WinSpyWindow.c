@@ -38,7 +38,7 @@ static int nLeftBorder;			// pixels between leftside + tab sheet
 static int nBottomBorder;		// pixels between bottomside + tab
 
 static BOOL fxMaxed, fyMaxed;	// Remember our sized state when a size/move starts
-static UINT uHitTest;			// Keep track of if sizing or moving
+static UINT_PTR uHitTest;		// Keep track of if sizing or moving
 
 //
 //	These two variables help us to position WinSpy++
@@ -875,7 +875,7 @@ UINT WinSpyDlg_ExitSizeMove(HWND hwnd)
 	return 0;
 }
 
-UINT WinSpyDlg_FullWindowDrag(HWND hwnd, WPARAM wParam, LPARAM lParam)
+UINT_PTR WinSpyDlg_FullWindowDrag(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	uHitTest = DefWindowProc(hwnd, WM_NCHITTEST, wParam, lParam);
 		
@@ -883,7 +883,7 @@ UINT WinSpyDlg_FullWindowDrag(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	if(fFullDragging &&	uHitTest == HTCLIENT) 
 		uHitTest = HTCAPTION;
 
-	SetWindowLong(hwnd, DWL_MSGRESULT, uHitTest);
+	SetWindowLongPtr(hwnd, DWLP_MSGRESULT, uHitTest);
 	return uHitTest;
 }
 

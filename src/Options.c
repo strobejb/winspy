@@ -89,7 +89,7 @@ void SaveSettings(void)
 	RegCloseKey(hkey);
 }
 
-BOOL CALLBACK OptionsDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK OptionsDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	static HWND hwndTarget;
 

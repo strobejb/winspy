@@ -47,7 +47,7 @@ void SetGeneralInfo(HWND hwnd)
 	// because it gets text of children in other processes
 	if(spy_fPassword == FALSE)
 	{
-		DWORD dwResult;
+		DWORD_PTR dwResult;
 
 		ach[0] = 0;
 
@@ -136,11 +136,11 @@ void SetGeneralInfo(HWND hwnd)
 	}
 
 	//instance handle
-	wsprintf(ach, szHexFmt, GetWindowLong(hwnd, GWL_HINSTANCE));
+	wsprintf(ach, szHexFmt, GetWindowLongPtr(hwnd, GWLP_HINSTANCE));
 	SetDlgItemText(hwndDlg, IDC_INSTANCE, ach);
 
 	//user data
-	wsprintf(ach, szHexFmt, GetWindowLong(hwnd, GWL_USERDATA));
+	wsprintf(ach, szHexFmt, GetWindowLongPtr(hwnd, GWLP_USERDATA));
 	SetDlgItemText(hwndDlg, IDC_USERDATA, ach);
 
 	//control ID

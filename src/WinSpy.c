@@ -112,9 +112,9 @@ void DisplayWindowInfo(HWND hwnd)
 	GetClassName(hwnd, spy_szClassName, 70);
 
 	if(IsWindowUnicode(hwnd))
-		spy_WndProc = (WNDPROC)GetWindowLongW(hwnd, GWL_WNDPROC);
+		spy_WndProc = (WNDPROC)GetWindowLongPtrW(hwnd, GWLP_WNDPROC);
 	else
-		spy_WndProc = (WNDPROC)GetWindowLongA(hwnd, GWL_WNDPROC);
+		spy_WndProc = (WNDPROC)GetWindowLongPtrA(hwnd, GWLP_WNDPROC);
 
 	// If an password-edit control, then we can
 	// inject our thread to get the password text!
@@ -402,7 +402,7 @@ HWND CreateTooltip(HWND hwndDlg)
 		ti.lpszText = CtrlTips[i].szText;
 		ti.lParam   = 0;
 	
-		fRet = SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)&ti);
+		fRet = (BOOL)SendMessage(hwndTT, TTM_ADDTOOL, 0, (LPARAM)&ti);
 	}
 	
 	SendMessage(hwndTT, TTM_ACTIVATE, fEnableToolTips, 0);
@@ -731,7 +731,7 @@ void DumpRect(HWND hwnd)
 //
 //	Dialog procedure for main window
 //
-BOOL WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch(msg)
 	{
@@ -759,7 +759,7 @@ BOOL WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return WinSpyDlg_Size(hwnd, wParam, lParam);
 	
 	case WM_SIZING:
-		return WinSpyDlg_Sizing(hwnd, wParam, (RECT *)lParam);
+		return WinSpyDlg_Sizing(hwnd, (UINT)wParam, (RECT *)lParam);
 
 	case WM_NCHITTEST:
 		return WinSpyDlg_FullWindowDrag(hwnd, wParam, lParam);

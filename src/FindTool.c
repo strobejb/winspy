@@ -186,7 +186,7 @@ void FreeFinderResources()
 
 WNDFINDPROC GetWndFindProc(HWND hwnd)
 {
-	return (WNDFINDPROC)GetWindowLong(hwnd, GWL_USERDATA);
+	return (WNDFINDPROC)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 }
 
 UINT FireWndFindNotify(HWND hwndTool, UINT uCode, HWND hwnd)
@@ -297,7 +297,7 @@ static LRESULT CALLBACK draghookproc(int code, WPARAM wParam, LPARAM lParam)
 	if(!(state & 0xC0000000))
 	{
 		// Find ASCII character
-		UINT ch = MapVirtualKey(wParam, 2);
+		UINT ch = MapVirtualKey((UINT)wParam, 2);
 
 		if(ch == _T('c') || ch == _T('C'))
 		{
@@ -501,10 +501,10 @@ BOOL MakeFinderTool(HWND hwnd, WNDFINDPROC wfp)
 	SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmapDrag1);
 
 	// Set the callback for this control
-	SetWindowLong(hwnd, GWL_USERDATA, (LONG)wfp);
+	SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)wfp);
 	
 	// Subclass the static control
-	oldstaticproc = (WNDPROC)SetWindowLong(hwnd, GWL_WNDPROC, (LONG)StaticProc);
+	oldstaticproc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)StaticProc);
 
 	return TRUE;
 }

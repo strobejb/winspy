@@ -112,7 +112,7 @@ UINT WinSpyDlg_Sizing			(HWND hwnd, UINT nSide, RECT *prc);
 UINT WinSpyDlg_WindowPosChanged	(HWND hwnd, WINDOWPOS *wp);
 UINT WinSpyDlg_EnterSizeMove	(HWND hwnd);
 UINT WinSpyDlg_ExitSizeMove		(HWND hwnd);
-UINT WinSpyDlg_FullWindowDrag	(HWND hwnd, WPARAM wParam, LPARAM lParam);
+UINT_PTR WinSpyDlg_FullWindowDrag	(HWND hwnd, WPARAM wParam, LPARAM lParam);
 
 UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam);
 UINT WinSpyDlg_SysMenuHandler(HWND hwnd, WPARAM wParam, LPARAM lParam);
@@ -131,12 +131,12 @@ BOOL IsMinimized(HWND hwnd);
 //
 //	Dialog box procedures for each dialog tab.
 //
-BOOL CALLBACK GeneralDlgProc	(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK StyleDlgProc		(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK WindowDlgProc		(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK PropertyDlgProc	(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK ProcessDlgProc	(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK ClassDlgProc		(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK GeneralDlgProc	 (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK StyleDlgProc	 (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WindowDlgProc	 (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK PropertyDlgProc (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK ProcessDlgProc	 (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK ClassDlgProc	 (HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 
 // Top-level
 void DisplayWindowInfo  (HWND hwnd);

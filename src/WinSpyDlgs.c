@@ -201,7 +201,7 @@ void WinSpy_SetupPopupMenu(HMENU hMenu, HWND hwndTarget)
 //
 //	General tab
 //
-BOOL CALLBACK GeneralDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK GeneralDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	HWND  hCtrl;
 	TCHAR szCaption[256];
@@ -316,7 +316,7 @@ BOOL CALLBACK GeneralDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 //
 //	Style tab
 //
-BOOL CALLBACK StyleDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK StyleDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(iMsg)
 	{
@@ -328,13 +328,13 @@ BOOL CALLBACK StyleDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 
 	case WM_MEASUREITEM:
-		return FunkyList_MeasureItem(hwnd, wParam, (MEASUREITEMSTRUCT *)lParam);
+		return FunkyList_MeasureItem(hwnd, (UINT)wParam, (MEASUREITEMSTRUCT *)lParam);
 
 	case WM_DRAWITEM:
 
 		if(wParam == IDC_LIST1 || wParam == IDC_LIST2)
 		{
-			return FunkyList_DrawItem(hwnd, wParam, (DRAWITEMSTRUCT *)lParam);
+			return FunkyList_DrawItem(hwnd, (UINT)wParam, (DRAWITEMSTRUCT *)lParam);
 		}
 		else if(wParam == IDC_EDITSTYLE || wParam == IDC_EDITSTYLEEX)
 		{
@@ -369,7 +369,7 @@ BOOL CALLBACK StyleDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 //
 //	Window tab
 //
-BOOL CALLBACK WindowDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	HWND      hwndList1, hwndList2;
 	LVCOLUMN  lvcol;
@@ -457,7 +457,7 @@ BOOL CALLBACK WindowDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 //
 //	Properties tab
 //
-BOOL CALLBACK PropertyDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK PropertyDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	HWND      hwndList1;
 	LVCOLUMN  lvcol;
@@ -505,7 +505,7 @@ BOOL CALLBACK PropertyDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam
 //
 // Class tab.
 //
-BOOL CALLBACK ClassDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ClassDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(iMsg)
 	{
@@ -529,7 +529,7 @@ BOOL CALLBACK ClassDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 //
 //	Process Tab
 //
-BOOL CALLBACK ProcessDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ProcessDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	HMENU  hMenu, hPopup;
 	RECT   rect;

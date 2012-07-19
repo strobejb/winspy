@@ -211,7 +211,7 @@ int FormatWindowText(HWND hwnd, TCHAR szTotal[])
 	TCHAR *pszCaption;
 	DWORD dwStyle;
 	int len;
-	DWORD dwResult;
+	DWORD_PTR dwResult;
 
 	//
 	// Window handle in hex format

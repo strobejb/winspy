@@ -76,7 +76,7 @@ UINT CALLBACK StyleEditWndFindProc(HWND hwndTool, UINT uCode, HWND hwnd)
 	return 0;
 }
 
-BOOL CALLBACK StyleEditProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK StyleEditProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	static StyleEditState *state;
 
@@ -118,11 +118,11 @@ BOOL CALLBACK StyleEditProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 
 	case WM_MEASUREITEM:
-		return FunkyList_MeasureItem(hwnd, wParam, (MEASUREITEMSTRUCT *)lParam);
+		return FunkyList_MeasureItem(hwnd, (UINT)wParam, (MEASUREITEMSTRUCT *)lParam);
 
 	case WM_DRAWITEM:
 		if(wParam == IDC_LIST1 || wParam == IDC_LIST2)
-			return FunkyList_DrawItem(hwnd, wParam, (DRAWITEMSTRUCT *)lParam);
+			return FunkyList_DrawItem(hwnd, (UINT)wParam, (DRAWITEMSTRUCT *)lParam);
 		else
 			return FALSE;
 
@@ -171,8 +171,8 @@ BOOL CALLBACK StyleEditProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 				dwStyle  = GetDlgItemBaseInt(hwnd, IDC_EDIT1, 16);
 
-				caretidx = SendMessage(hwndList, LB_GETCARETINDEX, 0, 0);
-				cursel   = SendMessage(hwndList, LB_GETSEL, caretidx, 0);
+				caretidx = (int)SendMessage(hwndList, LB_GETCARETINDEX, 0, 0);
+				cursel   = (int)SendMessage(hwndList, LB_GETSEL, caretidx, 0);
 				
 				if(cursel)
 					dwStyle |=  SendMessage(hwndList, LB_GETITEMDATA, caretidx, 0);

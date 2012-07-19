@@ -27,7 +27,7 @@ static LRESULT CALLBACK NoFlickerTabProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 
 	//int bx, by;
 
-	WNDPROC OldTabProc = (WNDPROC)GetWindowLong(hwnd, GWL_USERDATA);
+	WNDPROC OldTabProc = (WNDPROC)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	switch(msg)
 	{
@@ -77,10 +77,10 @@ static LRESULT CALLBACK NoFlickerTabProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 BOOL RemoveTabCtrlFlicker(HWND hwndTab)
 {
 	//Subclass the tab control
-	WNDPROC oldproc = (WNDPROC)SetWindowLong(hwndTab, GWL_WNDPROC, (LONG)NoFlickerTabProc);
+	WNDPROC oldproc = (WNDPROC)SetWindowLongPtr(hwndTab, GWLP_WNDPROC, (LONG_PTR)NoFlickerTabProc);
 	
 	//Store the old window procedure
-	SetWindowLong(hwndTab, GWL_USERDATA, (LONG)oldproc);
+	SetWindowLongPtr(hwndTab, GWLP_USERDATA, (LONG_PTR)oldproc);
 	
 	return TRUE;
 }

@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BitmapButton.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CatpureWindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayClassInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayGeneralInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayProcessInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayPropInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayScrollInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayStyleInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DisplayWindowInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditSize.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditWindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FindTool.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FindToolTrans.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FunkyList.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GetRemoteWindowInfo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InjectThread.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Options.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RegHelper.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticCtrl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StyleEdit.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TabCtrlUtils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowFromPointEx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinSpy.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinSpyCommand.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinSpyDlgs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinSpyTree.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinSpyWindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadPNG.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AggressiveOptimize.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BitmapButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CaptureWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FindTool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InjectThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RegHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowFromPointEx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinSpy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource\WinSpy.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resource\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\bitmap2.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\bitmap3.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\bitmap4.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\bitmap5.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\bitmap6.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\bitmap7.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\cursor1.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\icon2.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\icon3.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\icon4.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\icon5.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\icon6.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\selbox.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\selbox2.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\rt_manif.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="selbox.png">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="resource\winspy.exe.manifest">
+      <Filter>Resource Files</Filter>
+    </Manifest>
+  </ItemGroup>
+</Project>

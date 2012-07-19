@@ -1,24 +1,24 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinSpy", "src\WinSpy.vcproj", "{5DF5096B-64E3-4C2E-80C6-006E37588CD9}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winspy", "src\winspy.vcxproj", "{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
 		Release|Win32 = Release|Win32
-		Unicode Debug|Win32 = Unicode Debug|Win32
-		Unicode Release|Win32 = Unicode Release|Win32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Debug|Win32.Build.0 = Debug|Win32
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Release|Win32.ActiveCfg = Release|Win32
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Release|Win32.Build.0 = Release|Win32
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{5DF5096B-64E3-4C2E-80C6-006E37588CD9}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Debug|Win32.Build.0 = Debug|Win32
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Debug|x64.ActiveCfg = Debug|x64
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Debug|x64.Build.0 = Debug|x64
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Release|Win32.ActiveCfg = Release|Win32
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Release|Win32.Build.0 = Release|Win32
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Release|x64.ActiveCfg = Release|x64
+		{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -902,7 +902,7 @@ DWORD EnumStyles(StyleLookupEx *StyleList, HWND hwndList, DWORD dwStyle, BOOL fA
 				dwStyle &= ~ (pStyle->style);
 			
 			// Add to list, and set the list's extra item data to the style's value
-			idx = SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)pStyle->name);
+			idx = (int)SendMessage(hwndList, LB_ADDSTRING, 0, (LPARAM)pStyle->name);
 			SendMessage(hwndList, LB_SETITEMDATA, idx, pStyle->style);
 
 			if(fAllStyles)
@@ -966,7 +966,7 @@ void FillStyleLists(HWND hwndTarget, HWND hwndStyleList, HWND hwndExStyleList, B
 			TCHAR ach[10];
 			
 			wsprintf(ach, szHexFmt, dwStyle);
-			idx = SendMessage(hwndStyleList, LB_ADDSTRING, 0, (LPARAM)ach);
+			idx = (int)SendMessage(hwndStyleList, LB_ADDSTRING, 0, (LPARAM)ach);
 			SendMessage(hwndStyleList, LB_SETITEMDATA, idx, dwStyle);
 
 			if(fAllStyles)
@@ -996,7 +996,7 @@ void FillStyleLists(HWND hwndTarget, HWND hwndStyleList, HWND hwndExStyleList, B
 			// Add them if required
 			if(StyleList != 0)
 			{
-				dwStyleEx = SendMessage(hwndTarget, dwMessage, 0, 0);
+				dwStyleEx = (DWORD)SendMessage(hwndTarget, dwMessage, 0, 0);
 				EnumStyles(StyleList, hwndExStyleList, dwStyleEx, fAllStyles);
 			}
 		}

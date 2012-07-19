@@ -35,8 +35,8 @@
 #define IDB_BITMAP4                     152
 #define IDB_PIN_BITMAP                  153
 #define IDR_RT_MANIFEST1                159
-#define IDB_PNG1                        160
-#define IDB_SELBOX                      160
+#define IDB_PNG1                        162
+#define IDB_SELBOX                      162
 #define IDC_LIST1                       1000
 #define IDC_DRAGGER                     1001
 #define IDC_LIST2                       1001
@@ -177,7 +177,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        161
+#define _APS_NEXT_RESOURCE_VALUE        163
 #define _APS_NEXT_COMMAND_VALUE         40044
 #define _APS_NEXT_CONTROL_VALUE         1071
 #define _APS_NEXT_SYMED_VALUE           101

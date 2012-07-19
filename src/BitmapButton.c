@@ -67,7 +67,7 @@ HRESULT _CloseThemeData(HTHEME hTheme)
 //
 static LRESULT CALLBACK BBProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	WNDPROC oldproc = (WNDPROC)GetWindowLong(hwnd, GWL_USERDATA);
+	WNDPROC oldproc = (WNDPROC)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 	TRACKMOUSEEVENT tme = { sizeof(tme) };
 
 	static BOOL mouseOver;
@@ -352,10 +352,10 @@ void MakeBitmapButton(HWND hwnd, UINT uIconId)
 	SendMessage(hwnd, BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIcon);
 
 	// Subclass (to reenable double-clicks)
-	oldproc = (WNDPROC)SetWindowLong(hwnd, GWL_WNDPROC, (LPARAM)BBProc);
+	oldproc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)BBProc);
 
 	// Store old procedure
-	SetWindowLong(hwnd, GWL_USERDATA, (LPARAM)oldproc);
+	SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)oldproc);
 
 	if(g_fThemeApiAvailable)
 		SetWindowTheme(hwnd, L"explorer", NULL);

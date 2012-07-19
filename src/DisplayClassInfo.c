@@ -269,21 +269,21 @@ void SetClassInfo(HWND hwnd)
 	SetDlgItemText(hwndDlg, IDC_WINDOWBYTES, ach);
 
 	//menu (not implemented)
-	wsprintf(ach, szHexFmt, GetClassLong(hwnd, GCL_MENUNAME));
+	wsprintf(ach, szHexFmt, GetClassLongPtr(hwnd, GCLP_MENUNAME));
 	SetDlgItemText(hwndDlg, IDC_MENUHANDLE, _T("(None)"));
 
 	//cursor handle
-	style = (UINT)GetClassLong(hwnd, GCL_HCURSOR);
+	style = (UINT)GetClassLongPtr(hwnd, GCLP_HCURSOR);
 	FormatStyle(ach, CursorLookup, NUM_CURSOR_STYLES, style);
 	SetDlgItemText(hwndDlg, IDC_CURSORHANDLE, ach);
 
 	//icon handle
-	style = GetClassLong(hwnd, GCL_HICON);
+	style = (UINT)GetClassLongPtr(hwnd, GCLP_HICON);
 	FormatStyle(ach, IconLookup, NUM_ICON_STYLES, style);
 	SetDlgItemText(hwndDlg, IDC_ICONHANDLE, ach);
 
 	//background brush handle
-	style = GetClassLong(hwnd, GCL_HBRBACKGROUND);
+	style = (UINT)GetClassLongPtr(hwnd, GCLP_HBRBACKGROUND);
 	
 	//first of all, search by COLOR_xxx value
 	if(-1 == FormatStyle(ach, BrushLookup, NUM_BRUSH_STYLES, style-1))

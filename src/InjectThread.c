@@ -44,9 +44,9 @@ DWORD InjectRemoteThread(HWND hwnd, LPTHREAD_START_ROUTINE lpCode, DWORD cbCodeS
 	HANDLE hRemoteThread = 0;	//handle to the injected thread
 	DWORD  dwRemoteThreadId =0;	//ID of the injected thread
 	
-	DWORD dwWritten = 0;		// Number of bytes written to the remote process
-	DWORD dwRead = 0;
-	DWORD dwExitCode;
+	SIZE_T dwWritten = 0;		// Number of bytes written to the remote process
+	SIZE_T dwRead = 0;
+	DWORD  dwExitCode;
 	
 	void *pRemoteData = 0;
 	
@@ -86,7 +86,7 @@ DWORD InjectRemoteThread(HWND hwnd, LPTHREAD_START_ROUTINE lpCode, DWORD cbCodeS
 		return FALSE;
 
 	// Write a copy of our injection thread into the remote process
-	WriteProcessMemory(hProcess, pdwRemoteCode, lpCode, cbCodeSize, &dwWritten);
+	WriteProcessMemory(hProcess, pdwRemoteCode, lpCode, (SIZE_T)cbCodeSize, &dwWritten);
 
 	// Write a copy of the INJTHREAD to the remote process. This structure
 	// MUST start on a 32bit boundary

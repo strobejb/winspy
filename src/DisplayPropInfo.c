@@ -21,7 +21,7 @@
 //
 //	Called once for each window property
 //
-BOOL CALLBACK PropEnumProcEx(HWND hwnd, LPTSTR lpszString, HANDLE hData, DWORD dwUser)
+BOOL CALLBACK PropEnumProcEx(HWND hwnd, LPTSTR lpszString, HANDLE hData, ULONG_PTR dwUser)
 {
 	HWND   hwndList = (HWND)dwUser;
 	TCHAR  ach[256];
@@ -59,9 +59,8 @@ BOOL CALLBACK PropEnumProcEx(HWND hwnd, LPTSTR lpszString, HANDLE hData, DWORD d
 void EnumWindowProps(HWND hwnd, HWND hwndList)
 {
 	ListView_DeleteAllItems(hwndList);	
-	EnumPropsEx(hwnd, PropEnumProcEx, (DWORD)hwndList);
+	EnumPropsEx(hwnd, PropEnumProcEx, (ULONG_PTR)hwndList);
 }
-
 
 void SetPropertyInfo(HWND hwnd)
 {

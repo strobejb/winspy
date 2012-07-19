@@ -64,7 +64,7 @@ void SetTargetPos(HWND hwndDlg, HWND hwndTarget)
 //
 //	Dialog procedure for the edit size window
 //
-BOOL CALLBACK EditSizeDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK EditSizeDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	RECT  rect;	
 
