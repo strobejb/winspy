@@ -57,6 +57,13 @@
 HWND WindowFromPointEx(POINT pt, BOOL fShowHidden);
 void CaptureWindow(HWND hwndParent, HWND hwnd);
 
+HWND ShowTransWindow(HWND);
+void ShowSel(HWND);
+void HideSel(HWND);
+
+static BOOL fTransSel = TRUE;
+static HWND hwndTransPanel = 0;
+
 static LONG    lRefCount = 0;
 
 static HCURSOR hOldCursor;
@@ -198,7 +205,8 @@ LRESULT EndFindToolDrag(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	hwndParent = GetParent(hwnd);
 	
-	InvertWindow(hwndCurrent, fShowHidden);
+	//InvertWindow(hwndCurrent, fShowHidden);
+	HideSel(hwndCurrent);
 	ReleaseCapture();
 	SetCursor(hOldCursor);
 
@@ -240,17 +248,21 @@ static LRESULT CALLBACK draghookproc(int code, WPARAM wParam, LPARAM lParam)
 		
 		if(state & 0x80000000)
 		{
-			InvertWindow(hwndCurrent, fShowHidden);
+			//InvertWindow(hwndCurrent, fShowHidden);
+			HideSel(hwndCurrent);
 			FireWndFindNotify(draghookhwnd, WFN_SHIFT_UP, 0);
-			InvertWindow(hwndCurrent, fShowHidden);
+			//InvertWindow(hwndCurrent, fShowHidden);
+			ShowSel(hwndCurrent);
 		}
 		else
 		{
 			if(!(state & 0x40000000))
 			{
-				InvertWindow(hwndCurrent, fShowHidden);
+				//InvertWindow(hwndCurrent, fShowHidden);
+				HideSel(hwndCurrent);
 				FireWndFindNotify(draghookhwnd, WFN_SHIFT_DOWN, 0);
-				InvertWindow(hwndCurrent, fShowHidden);
+				//InvertWindow(hwndCurrent, fShowHidden);
+				ShowSel(hwndCurrent);
 			}
 		}
 
@@ -260,17 +272,21 @@ static LRESULT CALLBACK draghookproc(int code, WPARAM wParam, LPARAM lParam)
 
 		if(state & 0x80000000)
 		{
-			InvertWindow(hwndCurrent, fShowHidden);
+			//InvertWindow(hwndCurrent, fShowHidden);
+			HideSel(hwndCurrent);
 			FireWndFindNotify(draghookhwnd, WFN_CTRL_UP, 0);
-			InvertWindow(hwndCurrent, fShowHidden);
+			//InvertWindow(hwndCurrent, fShowHidden);
+			ShowSel(hwndCurrent);
 		}
 		else
 		{
 			if(!(state & 0x40000000))
 			{
-				InvertWindow(hwndCurrent, fShowHidden);
+				//InvertWindow(hwndCurrent, fShowHidden);
+				HideSel(hwndCurrent);
 				FireWndFindNotify(draghookhwnd, WFN_CTRL_DOWN, 0);
-				InvertWindow(hwndCurrent, fShowHidden);
+				//InvertWindow(hwndCurrent, fShowHidden);
+				ShowSel(hwndCurrent);
 			}
 		}
 		
@@ -285,9 +301,11 @@ static LRESULT CALLBACK draghookproc(int code, WPARAM wParam, LPARAM lParam)
 
 		if(ch == _T('c') || ch == _T('C'))
 		{
-			InvertWindow(hwndCurrent, fShowHidden);
+			//InvertWindow(hwndCurrent, fShowHidden);
+			HideSel(hwndCurrent);
 			CaptureWindow(GetParent(draghookhwnd), hwndCurrent);
-			InvertWindow(hwndCurrent, fShowHidden);
+			//InvertWindow(hwndCurrent, fShowHidden);
+			ShowSel(hwndCurrent);
 			return -1;
 		}
 	}
@@ -295,15 +313,53 @@ static LRESULT CALLBACK draghookproc(int code, WPARAM wParam, LPARAM lParam)
 	return CallNextHookEx(draghook, code, wParam, lParam);
 }
 
+void ShowSel(HWND hwnd)
+{
+	TCHAR ach[20];
+	wsprintf(ach, TEXT("ShowSel %x\n"), hwnd);
+	OutputDebugString(ach);
+	if(fTransSel)
+	{
+		hwndTransPanel = ShowTransWindow(hwnd);
+	}
+	else
+	{			
+		InvertWindow(hwnd, fShowHidden);
+	}
+}
+
+void HideSel(HWND hwnd)
+{
+	TCHAR ach[20];
+	wsprintf(ach, TEXT("HideSel %x\n"), hwnd);
+	OutputDebugString(ach);
+
+	if(fTransSel)
+	{
+		DestroyWindow(hwndTransPanel);
+		hwndTransPanel = 0;
+	}
+	else
+	{			
+		InvertWindow(hwnd, fShowHidden);
+	}
+}
+
 
 LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	HWND hwndParent;
+	POINT pt;
+
+	static POINT ptLast;
 
 	switch(msg)
 	{
 	case WM_LBUTTONDBLCLK:
 	case WM_LBUTTONDOWN:
+
+		ptLast.x = (short)LOWORD(lParam);
+		ptLast.y = (short)HIWORD(lParam);
 
 		// Ask the callback function if we want to proceed
 		if(FireWndFindNotify(hwnd, WFN_BEGIN, 0) == -1)
@@ -316,13 +372,9 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmapDrag2);
 
 		hwndParent = GetParent(hwnd);
+		hwndCurrent = hwnd;
 		
-		//else
-		{
-			hwndCurrent = hwnd;
-			InvertWindow(hwndCurrent, fShowHidden);
-		}
-
+		ShowSel(hwndCurrent);
 		
 		SetCapture(hwnd);
 		hOldCursor = SetCursor(hCursor);
@@ -341,16 +393,21 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_MOUSEMOVE:
-		if(fDragging == TRUE)
+
+		pt.x = (short)LOWORD(lParam);
+		pt.y = (short)HIWORD(lParam);
+
+		if(fDragging == TRUE && ptLast.x != pt.x && ptLast.y != pt.y)
 		{
 			//MoveFindTool(hwnd, wParam, lParam);
 
-			POINT pt;
 			HWND hWndPoint;
+			char ach[80];
 
-			pt.x = (short)LOWORD(lParam);
-			pt.y = (short)HIWORD(lParam);
+			wsprintfA(ach, "Moving %d %d - %d %d\n", pt.x, pt.y, ptLast.x, ptLast.y);
+			OutputDebugStringA(ach);
 			
+			ptLast = pt;
 			ClientToScreen(hwnd, (POINT *)&pt);
 
 			hWndPoint = WindowFromPointEx(pt, fShowHidden);
@@ -360,10 +417,12 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			if(hWndPoint != hwndCurrent)
 			{
-				InvertWindow(hwndCurrent, fShowHidden);
+				HideSel(hwndCurrent);
+				//InvertWindow(hwndCurrent, fShowHidden);
 
 				FireWndFindNotify(hwnd, WFN_SELCHANGED, hWndPoint);
-				InvertWindow(hWndPoint, fShowHidden);
+				//InvertWindow(hWndPoint, fShowHidden);
+				ShowSel(hWndPoint);
 
 				hwndCurrent = hWndPoint;
 			}

@@ -17,6 +17,39 @@
 int atoi( const char *string );
 
 //
+//	Enable/Disable privilege with specified name (for current process)
+//
+BOOL EnablePrivilege(TCHAR *szPrivName, BOOL fEnable)
+{
+	TOKEN_PRIVILEGES tp;
+	LUID	luid;
+	HANDLE	hToken;
+
+	if(!LookupPrivilegeValue(NULL, szPrivName, &luid))
+		return FALSE;
+
+	if(!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+		return FALSE;
+	
+	tp.PrivilegeCount			= 1;
+	tp.Privileges[0].Luid		= luid;
+	tp.Privileges[0].Attributes = fEnable ? SE_PRIVILEGE_ENABLED : 0;
+	
+	AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(tp), NULL, NULL);
+
+	CloseHandle(hToken);
+
+	return (GetLastError() == ERROR_SUCCESS);
+}
+
+
+BOOL EnableDebugPrivilege()
+{
+	return EnablePrivilege(SE_DEBUG_NAME, TRUE);
+}
+
+
+//
 // Style helper functions
 //
 UINT AddStyle(HWND hwnd, UINT style)

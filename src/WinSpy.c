@@ -154,8 +154,8 @@ UINT CALLBACK WndFindProc(HWND hwndTool, UINT uCode, HWND hwnd)
 {
 	HWND hwndMain = GetParent(hwndTool);
 
-	TCHAR ach[90];
-	TCHAR szClass[70];
+	TCHAR ach[90] = {0};
+	TCHAR szClass[70] = {0};
 
 	static BOOL fFirstDrag = TRUE;
 	static HWND hwndLastTarget;
@@ -829,6 +829,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ice.dwSize = sizeof ice;
 	ice.dwICC  = ICC_BAR_CLASSES      | ICC_TREEVIEW_CLASSES |
 		         ICC_LISTVIEW_CLASSES | ICC_TAB_CLASSES      ;
+
+	EnableDebugPrivilege();
 
 	InitCommonControls();//Ex(&ice);
 

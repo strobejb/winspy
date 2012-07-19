@@ -26,7 +26,7 @@ typedef BOOL  (WINAPI * EnumProcessModulesProc )(HANDLE, HMODULE *, DWORD, LPDWO
 typedef DWORD (WINAPI * GetModuleBaseNameProc  )(HANDLE, HMODULE, LPTSTR, DWORD);
 typedef DWORD (WINAPI * GetModuleFileNameExProc)(HANDLE, HMODULE, LPTSTR, DWORD);
 
-BOOL GetProcessNameByPid(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCHAR szPath[], DWORD nPathSize)
+BOOL GetProcessNameByPid1(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCHAR szPath[], DWORD nPathSize)
 {
 	HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	PROCESSENTRY32 pe = { sizeof(pe) };
@@ -75,7 +75,7 @@ BOOL GetProcessNameByPid(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCH
 //  szPath       [out]
 //  nPathSize    [in]	
 //
-BOOL GetProcessNameByPid0(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCHAR szPath[], DWORD nPathSize)
+BOOL GetProcessNameByPid(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCHAR szPath[], DWORD nPathSize)
 {
 	HMODULE hPSAPI;
 	HANDLE hProcess;
@@ -97,7 +97,10 @@ BOOL GetProcessNameByPid0(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TC
 	}
 	
 	// OK, we have access to the PSAPI functions, so open the process
-	hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwProcessId);
+	hProcess = OpenProcess(
+		//PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 
+		PROCESS_QUERY_LIMITED_INFORMATION|PROCESS_VM_READ,
+		FALSE, dwProcessId);
 
 	if(!hProcess) 
 	{

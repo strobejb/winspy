@@ -804,6 +804,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\FindToolTrans.c"
+				>
+			</File>
+			<File
 				RelativePath="FunkyList.c"
 				>
 				<FileConfiguration
@@ -910,6 +914,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\LoadPNG.cpp"
+				>
 			</File>
 			<File
 				RelativePath="Options.c"
@@ -1398,19 +1406,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\resource\bitmap1.bmp"
-				>
-			</File>
-			<File
 				RelativePath="bitmap1.bmp"
 				>
 			</File>
 			<File
-				RelativePath=".\resource\bitmap2.bmp"
+				RelativePath=".\resource\bitmap1.bmp"
 				>
 			</File>
 			<File
 				RelativePath="bitmap2.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\resource\bitmap2.bmp"
 				>
 			</File>
 			<File
@@ -1422,15 +1430,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\resource\bitmap4.bmp"
-				>
-			</File>
-			<File
 				RelativePath="bitmap4.bmp"
 				>
 			</File>
 			<File
-				RelativePath="bitmap5.bmp"
+				RelativePath=".\resource\bitmap4.bmp"
 				>
 			</File>
 			<File
@@ -1438,11 +1442,15 @@
 				>
 			</File>
 			<File
-				RelativePath="bitmap6.bmp"
+				RelativePath="bitmap5.bmp"
 				>
 			</File>
 			<File
 				RelativePath=".\resource\bitmap6.bmp"
+				>
+			</File>
+			<File
+				RelativePath="bitmap6.bmp"
 				>
 			</File>
 			<File
@@ -1466,11 +1474,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\resource\cursor1.cur"
+				RelativePath="cursor1.cur"
 				>
 			</File>
 			<File
-				RelativePath="cursor1.cur"
+				RelativePath=".\resource\cursor1.cur"
 				>
 			</File>
 			<File
@@ -1542,11 +1550,11 @@
 				>
 			</File>
 			<File
-				RelativePath="icon2.ico"
+				RelativePath=".\resource\icon2.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\resource\icon2.ico"
+				RelativePath="icon2.ico"
 				>
 			</File>
 			<File
@@ -1558,19 +1566,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\resource\icon4.ico"
-				>
-			</File>
-			<File
 				RelativePath="icon4.ico"
 				>
 			</File>
 			<File
-				RelativePath="icon5.ico"
+				RelativePath=".\resource\icon4.ico"
 				>
 			</File>
 			<File
 				RelativePath=".\resource\icon5.ico"
+				>
+			</File>
+			<File
+				RelativePath="icon5.ico"
 				>
 			</File>
 			<File
@@ -1602,6 +1610,14 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\selbox.png"
+			>
+		</File>
+		<File
+			RelativePath=".\resource\selbox.png"
+			>
+		</File>
 		<File
 			RelativePath=".\resource\winspy.exe.manifest"
 			>

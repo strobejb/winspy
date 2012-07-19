@@ -19,6 +19,8 @@ DWORD GetDlgItemBaseInt(HWND hwnd, UINT ctrlid, int base);
 UINT _tstrtoib16(TCHAR *szHexStr);
 BOOL EnableDialogTheme(HWND hwnd);
 
+BOOL EnableDebugPrivilege();
+
 #ifdef __cplusplus
 }
 #endif
