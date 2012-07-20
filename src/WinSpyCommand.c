@@ -266,6 +266,8 @@ UINT WinSpyDlg_SysMenuHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	TCHAR szText[200];
 	TCHAR szTitle[60];
+	TCHAR szVersion[40];
+	TCHAR szCurExe[MAX_PATH];
 
 	switch(wParam & 0xFFF0)
 	{
@@ -293,8 +295,11 @@ UINT WinSpyDlg_SysMenuHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 
 	case IDM_WINSPY_ABOUT:
+
+		GetModuleFileName(0, szCurExe, MAX_PATH);
+		GetVersionString(szCurExe, TEXT("FileVersion"), szVersion, 40);
 		
-		wsprintf(szText, _T("%s v%s\n\r\n\rCopyright(c) 2002-2006 by Catch22 Productions.\n\rWritten by J Brown.\n\r\n\rHomepage at www.catch22.net"), szAppName, szVerString);
+		wsprintf(szText, _T("%s v%s\n\r\n\rCopyright(c) 2002-2012 by Catch22 Productions.\n\rWritten by J Brown.\n\r\n\rHomepage at www.catch22.net"), szAppName, szVersion);
 		wsprintf(szTitle, _T("About %s"), szAppName);
 		
 		MessageBox(hwnd, szText, szTitle, MB_OK|MB_ICONINFORMATION);

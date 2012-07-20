@@ -21,6 +21,8 @@ BOOL EnableDialogTheme(HWND hwnd);
 
 BOOL EnableDebugPrivilege();
 
+TCHAR *GetVersionString(TCHAR *szFileName, TCHAR *szValue, TCHAR *szBuffer, ULONG nLength);
+
 #ifdef __cplusplus
 }
 #endif

@@ -224,7 +224,6 @@ extern HINSTANCE hInst;
 
 extern TCHAR szHexFmt[];
 extern TCHAR szAppName[];
-extern TCHAR szVerString[];
 
 extern HWND	 hwndPin;		// Toolbar with pin bitmap
 extern HWND	 hwndSizer;		// Sizing grip for bottom-right corner

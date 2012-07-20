@@ -31,7 +31,6 @@ HINSTANCE	hInst;			// Current application instance
 
 TCHAR szHexFmt[]	= _T("%08X");
 TCHAR szAppName[]	= _T("WinSpy++");
-TCHAR szVerString[] = _T("1.7.1");
 
 //
 //	Current window being spied on
