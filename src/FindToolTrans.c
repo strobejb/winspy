@@ -208,28 +208,35 @@ ATOM InitTrans()
 HWND ShowTransWindow(HWND hwnd)//, RECT *rect)
 {
 	HWND hwndTransPanel;
-
 	RECT r,rect;
-	GetWindowRect(hwnd, &r);
-	rect = r;
 
-	InitTrans();
+	__try
+	{
+		GetWindowRect(hwnd, &r);
+		rect = r;
 
-	hwndTransPanel = CreateWindowEx(
-		WS_EX_TOOLWINDOW|WS_EX_LAYERED,
-		WC_TRANSWINDOW, 
-		0, 
-		WS_POPUP,
-		r.left, r.top, 
-		r.right-r.left,
-		r.bottom-r.top, 
-		0, 0,0, &rect);
+		InitTrans();
 
-	UpdatePanelTrans(hwndTransPanel, &r);
+		hwndTransPanel = CreateWindowEx(
+			WS_EX_TOOLWINDOW|WS_EX_LAYERED,
+			WC_TRANSWINDOW, 
+			0, 
+			WS_POPUP,
+			r.left, r.top, 
+			r.right-r.left,
+			r.bottom-r.top, 
+			0, 0,0, &rect);
 
-	SetWindowPos(hwndTransPanel, HWND_TOPMOST, 
-		0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_SHOWWINDOW);
+		UpdatePanelTrans(hwndTransPanel, &r);
 
-	//SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_SHOWWINDOW);
-	return hwndTransPanel;
+		SetWindowPos(hwndTransPanel, HWND_TOPMOST, 
+			0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_SHOWWINDOW);
+
+		//SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_SHOWWINDOW);
+		return hwndTransPanel;
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		return 0;
+	}
 }

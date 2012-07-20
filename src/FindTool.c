@@ -315,12 +315,15 @@ static LRESULT CALLBACK draghookproc(int code, WPARAM wParam, LPARAM lParam)
 
 void ShowSel(HWND hwnd)
 {
-	TCHAR ach[20];
-	wsprintf(ach, TEXT("ShowSel %x\n"), hwnd);
-	OutputDebugString(ach);
 	if(fTransSel)
 	{
 		hwndTransPanel = ShowTransWindow(hwnd);
+
+		if(hwndTransPanel == 0)
+		{
+			fTransSel = FALSE;
+			InvertWindow(hwnd, fShowHidden);
+		}
 	}
 	else
 	{			
@@ -330,10 +333,6 @@ void ShowSel(HWND hwnd)
 
 void HideSel(HWND hwnd)
 {
-	TCHAR ach[20];
-	wsprintf(ach, TEXT("HideSel %x\n"), hwnd);
-	OutputDebugString(ach);
-
 	if(fTransSel)
 	{
 		DestroyWindow(hwndTransPanel);
@@ -402,10 +401,6 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			//MoveFindTool(hwnd, wParam, lParam);
 
 			HWND hWndPoint;
-			char ach[80];
-
-			wsprintfA(ach, "Moving %d %d - %d %d\n", pt.x, pt.y, ptLast.x, ptLast.y);
-			OutputDebugStringA(ach);
 			
 			ptLast = pt;
 			ClientToScreen(hwnd, (POINT *)&pt);

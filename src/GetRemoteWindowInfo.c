@@ -174,8 +174,6 @@ BOOL GetRemoteWindowInfo(HWND hwnd, WNDCLASSEX *pClass, WNDPROC *pProc, TCHAR *p
 		*pProc  = InjData.wndproc;
 
 		lstrcpyn(pszText, InjData.szText, 200);
-		pszText[200] = 0;
-
 		return TRUE;
 	}
 }
