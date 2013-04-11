@@ -23,20 +23,20 @@
 
 #include "InjectThread.h"
 
-typedef BOOL (WINAPI *PROCGETCLASSINFOEX) (HINSTANCE, LPTSTR, WNDCLASSEX*);
-typedef LONG (WINAPI *PROCGETWINDOWLONG)  (HWND, int);
-typedef int  (WINAPI *PROCGETWINDOWTEXT)  (HWND, LPTSTR, int);
-typedef UINT (WINAPI *PROCSENDMESSAGETO)  (HWND, UINT, WPARAM, LPARAM, UINT, UINT, DWORD*);
+typedef BOOL     (WINAPI *PROCGETCLASSINFOEX)    (HINSTANCE, LPTSTR, WNDCLASSEX*);
+typedef LONG_PTR (WINAPI *PROCGETWINDOWLONGPTR)  (HWND, int);
+typedef int      (WINAPI *PROCGETWINDOWTEXT)     (HWND, LPTSTR, int);
+typedef UINT     (WINAPI *PROCSENDMESSAGETO)     (HWND, UINT, WPARAM, LPARAM, UINT, UINT, DWORD*);
 
 //
 //	Define a structure for the remote thread to use
 //
 typedef struct 
 {
-	PROCGETCLASSINFOEX fnGetClassInfoEx;
-	PROCGETWINDOWLONG  fnGetWindowLong;
-	PROCGETWINDOWTEXT  fnGetWindowText;
-	PROCSENDMESSAGETO  fnSendMessageTimeout;
+	PROCGETCLASSINFOEX    fnGetClassInfoEx;
+	PROCGETWINDOWLONGPTR  fnGetWindowLongPtr;
+	PROCGETWINDOWTEXT     fnGetWindowText;
+	PROCSENDMESSAGETO     fnSendMessageTimeout;
 
 	HWND        hwnd;		//window we want to get class info for
 	ATOM        atom;		//class atom of window
@@ -68,8 +68,8 @@ static DWORD WINAPI GetClassInfoExProc(LPVOID *pParam)
 	BOOL    fRet = 0;
 	DWORD   dwResult;
 
-	if(pInjData->fnGetWindowLong)
-		pInjData->wndproc = (WNDPROC)pInjData->fnGetWindowLong(pInjData->hwnd, GWLP_WNDPROC);
+	if(pInjData->fnGetWindowLongPtr)
+		pInjData->wndproc = (WNDPROC)pInjData->fnGetWindowLongPtr(pInjData->hwnd, GWLP_WNDPROC);
 
 	if(pInjData->fnGetClassInfoEx)
 		fRet = pInjData->fnGetClassInfoEx(pInjData->hInst, (LPTSTR)pInjData->szClassName, &pInjData->wcOutput);
@@ -122,14 +122,22 @@ BOOL GetRemoteWindowInfo(HWND hwnd, WNDCLASSEX *pClass, WNDPROC *pProc, TCHAR *p
 	
 	if(IsWindowUnicode(hwnd))
 	{
-		InjData.fnGetWindowLong  = (PROCGETWINDOWLONG)  GetProcAddress(hUser32, "GetWindowLongW");
+#ifdef _WIN64
+		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongPtrW");
+#else // ifndef _WIN64
+		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongW");
+#endif // _WIN64
 		InjData.fnGetClassInfoEx = (PROCGETCLASSINFOEX) GetProcAddress(hUser32, "GetClassInfoExW");
 
 		GetClassNameW(hwnd, (WORD *)InjData.szClassName, sizeof(InjData.szClassName) / sizeof(WORD));
 	}
 	else
 	{
-		InjData.fnGetWindowLong  = (PROCGETWINDOWLONG)  GetProcAddress(hUser32, "GetWindowLongA");
+#ifdef _WIN64
+		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongPtrA");
+#else // ifndef _WIN64
+		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongA");
+#endif // _WIN64
 		InjData.fnGetClassInfoEx = (PROCGETCLASSINFOEX) GetProcAddress(hUser32, "GetClassInfoExA");
 
 		GetClassNameA(hwnd, (char *)InjData.szClassName, sizeof(InjData.szClassName) / sizeof(char));
