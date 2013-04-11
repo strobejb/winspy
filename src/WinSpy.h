@@ -223,6 +223,7 @@ extern UINT  uPinnedCorner;
 extern HINSTANCE hInst;
 
 extern TCHAR szHexFmt[];
+extern TCHAR szPtrFmt[];
 extern TCHAR szAppName[];
 
 extern HWND	 hwndPin;		// Toolbar with pin bitmap
