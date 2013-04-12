@@ -98,7 +98,6 @@ static void AfterThreadProc(void) { }
 BOOL GetRemoteWindowInfo(HWND hwnd, WNDCLASSEX *pClass, WNDPROC *pProc, TCHAR *pszText, int nTextLen)
 {
 	INJDATA InjData;
-	HMODULE hUser32 = GetModuleHandle(__TEXT("User32"));
 	BOOL    fReturn;
 
 	DWORD   dwThreadId;
@@ -112,33 +111,20 @@ BOOL GetRemoteWindowInfo(HWND hwnd, WNDCLASSEX *pClass, WNDPROC *pProc, TCHAR *p
 	ZeroMemory(&InjData, sizeof(InjData));
 
 	// Get pointers to the API calls we will be using in the remote thread
-#ifdef UNICODE
-	InjData.fnSendMessageTimeout = (PROCSENDMESSAGETO)  GetProcAddress(hUser32, "SendMessageTimeoutW");
-	//InjData.fnGetWindowText  = (PROCGETWINDOWTEXT)  GetProcAddress(hUser32, "GetWindowTextW");
-#else
-	InjData.fnSendMessageTimeout = (PROCSENDMESSAGETO)  GetProcAddress(hUser32, "SendMessageTimeoutA");
-	//InjData.fnGetWindowText  = (PROCGETWINDOWTEXT)  GetProcAddress(hUser32, "GetWindowTextA");
-#endif
-	
+	InjData.fnSendMessageTimeout = (PROCSENDMESSAGETO) SendMessageTimeout;
+	//InjData.fnGetWindowText  = (PROCGETWINDOWTEXT) GetWindowText;
+
 	if(IsWindowUnicode(hwnd))
 	{
-#ifdef _WIN64
-		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongPtrW");
-#else // ifndef _WIN64
-		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongW");
-#endif // _WIN64
-		InjData.fnGetClassInfoEx = (PROCGETCLASSINFOEX) GetProcAddress(hUser32, "GetClassInfoExW");
+		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR) GetWindowLongPtrW;
+		InjData.fnGetClassInfoEx = (PROCGETCLASSINFOEX) GetClassInfoExW;
 
 		GetClassNameW(hwnd, (WORD *)InjData.szClassName, sizeof(InjData.szClassName) / sizeof(WORD));
 	}
 	else
 	{
-#ifdef _WIN64
-		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongPtrA");
-#else // ifndef _WIN64
-		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR)  GetProcAddress(hUser32, "GetWindowLongA");
-#endif // _WIN64
-		InjData.fnGetClassInfoEx = (PROCGETCLASSINFOEX) GetProcAddress(hUser32, "GetClassInfoExA");
+		InjData.fnGetWindowLongPtr  = (PROCGETWINDOWLONGPTR) GetWindowLongPtrA;
+		InjData.fnGetClassInfoEx = (PROCGETCLASSINFOEX) GetClassInfoExA;
 
 		GetClassNameA(hwnd, (char *)InjData.szClassName, sizeof(InjData.szClassName) / sizeof(char));
 	}
