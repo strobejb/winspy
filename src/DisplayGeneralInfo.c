@@ -64,7 +64,7 @@ void SetGeneralInfo(HWND hwnd)
 	}
 
 	//class name
-	GetClassName(hwnd, ach, sizeof ach);
+	GetClassName(hwnd, ach, sizeof(ach)/sizeof(TCHAR));
 
 	if(IsWindowUnicode(hwnd))	lstrcat(ach, _T("  (Unicode)"));
 

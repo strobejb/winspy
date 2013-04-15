@@ -297,7 +297,7 @@ BOOL CaptureWindow(HWND hwndOwner, HWND hwnd)
 	RasterCapsScrn  = GetDeviceCaps(hdc, RASTERCAPS);
 	PaletteSizeScrn = GetDeviceCaps(hdc, SIZEPALETTE);
   
-	if((RasterCapsScrn & RC_PALETTE) && (PaletteSizeScrn = 256))
+	if((RasterCapsScrn & RC_PALETTE) && (PaletteSizeScrn == 256))
 		hPal = GetSystemPalette(hdc);
 	else
 		hPal = 0;
