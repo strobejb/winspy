@@ -192,9 +192,18 @@ UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		
 		if(GetWindowLayout(hwnd) == WINSPY_NORMAL)
 		{
-			RefreshTreeView(GetDlgItem(hwnd, IDC_TREE1));
+			hwndTree = GetDlgItem(hwnd, IDC_TREE1);
+
+			RefreshTreeView(hwndTree);
 			SetWindowLayout(hwnd, WINSPY_EXPANDED);
-			
+
+			hItem = FindTreeItemByHwnd(hwndTree, spy_hCurWnd, NULL);
+			if(hItem)
+			{
+				// Move it into view!
+				SendMessage(hwndTree, TVM_ENSUREVISIBLE, 0, (LPARAM)hItem);
+				SendMessage(hwndTree, TVM_SELECTITEM, TVGN_CARET, (LPARAM)hItem);
+			}
 		}
 		else
 		{
@@ -246,11 +255,19 @@ UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 			
 		// Find treeview item that contains our window handle
 		hItem = FindTreeItemByHwnd(hwndTree, spy_hCurWnd, NULL);
-			
-		// Move it into view!
-		SendMessage(hwndTree, TVM_ENSUREVISIBLE, 0, (LPARAM)hItem);
-		SendMessage(hwndTree, TVM_SELECTITEM, TVGN_CARET, (LPARAM)hItem);
-		SetFocus(hwndTree);
+		if(!hItem)
+		{
+			RefreshTreeView(hwndTree);
+			hItem = FindTreeItemByHwnd(hwndTree, spy_hCurWnd, NULL);
+		}
+
+		if(hItem)
+		{
+			// Move it into view!
+			SendMessage(hwndTree, TVM_ENSUREVISIBLE, 0, (LPARAM)hItem);
+			SendMessage(hwndTree, TVM_SELECTITEM, TVGN_CARET, (LPARAM)hItem);
+			SetFocus(hwndTree);
+		}
 			
 		return TRUE;
 		

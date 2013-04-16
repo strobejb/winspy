@@ -571,6 +571,9 @@ void DeInitGlobalWindowTree(HWND hwndTree)
 //
 HTREEITEM FindTreeItemByHwnd(HWND hwndTree, HWND hwndTarget, HTREEITEM hItem)
 {
+	if(!hwndTarget)
+		return NULL;
+
 	// Start at root if necessary
 	if(hItem == NULL)
 		hItem = (HTREEITEM)SendMessage(hwndTree, TVM_GETNEXTITEM, TVGN_ROOT, 0);

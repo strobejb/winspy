@@ -17,6 +17,8 @@
 #include "WinSpy.h"
 #include "Utils.h"
 
+HTREEITEM FindTreeItemByHwnd(HWND hwndTree, HWND hwndTarget, HTREEITEM hItem);
+
 #if (WINVER < 0x500)
 #error "Please install latest Platform SDK or define WINVER >= 0x500"
 #endif
@@ -837,7 +839,9 @@ UINT WinSpyDlg_ExitSizeMove(HWND hwnd)
 {
 	RECT rect;
 	UINT uLayout;
-	
+	HWND hwndTree;
+	HTREEITEM hItem;
+
 	static UINT uOldLayout = WINSPY_MINIMIZED;
 	
 
@@ -866,7 +870,18 @@ UINT WinSpyDlg_ExitSizeMove(HWND hwnd)
 	SetSysMenuIconFromLayout(hwnd, uLayout);
 	
 	if(uLayout == WINSPY_EXPANDED && uOldLayout != WINSPY_EXPANDED)
-		RefreshTreeView(GetDlgItem(hwnd, IDC_TREE1));
+	{
+		hwndTree = GetDlgItem(hwnd, IDC_TREE1);
+
+		RefreshTreeView(hwndTree);
+		hItem = FindTreeItemByHwnd(hwndTree, spy_hCurWnd, NULL);
+		if(hItem)
+		{
+			// Move it into view!
+			SendMessage(hwndTree, TVM_ENSUREVISIBLE, 0, (LPARAM)hItem);
+			SendMessage(hwndTree, TVM_SELECTITEM, TVGN_CARET, (LPARAM)hItem);
+		}
+	}
 	
 	// If the window was moved (ie. dragged by caption/client),
 	// Then update our pinned corner position
