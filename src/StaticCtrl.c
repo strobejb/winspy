@@ -232,7 +232,7 @@ void MakeHyperlink(HWND hwnd, UINT staticid, COLORREF crLink)
 
 	// subclass
 	url->oldproc = (WNDPROC)SetWindowLongPtr(hwndCtrl, GWLP_WNDPROC, (LONG_PTR)URLCtrlProc);
-	SetWindowLongPtr(hwndCtrl, GWLP_USERDATA, (LONG)url);
+	SetWindowLongPtr(hwndCtrl, GWLP_USERDATA, (LONG_PTR)url);
 	
 	return;
 }

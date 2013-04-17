@@ -27,7 +27,7 @@ BOOL CALLBACK PropEnumProcEx(HWND hwnd, LPTSTR lpszString, HANDLE hData, ULONG_P
 	TCHAR  ach[256];
 	LVITEM lvitem;
 
-	wsprintf(ach, szHexFmt, hData);
+	wsprintf(ach, szPtrFmt, hData);
 	
 	lvitem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE;
 	lvitem.iSubItem = 0;

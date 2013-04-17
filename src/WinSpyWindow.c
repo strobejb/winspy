@@ -492,49 +492,52 @@ UINT WinSpyDlg_Size(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	RECT rect;
 	RECT rect2;
 
-	cx = LOWORD(lParam);
-	cy = HIWORD(lParam);
-	
-	// Resize the right-hand tab control so that
-	// it fills the window
-	hwndCtrl = GetDlgItem(hwnd, IDC_TAB2);
-	GetWindowRect(hwndCtrl, &rect);
-	ScreenToClient(hwnd, (POINT *)&rect.left);
-	ScreenToClient(hwnd, (POINT *)&rect.right);
-	
-	MoveWindow(hwndCtrl, rect.left, rect.top, cx - rect.left - nLeftBorder, cy - rect.top - nBottomBorder, TRUE);
-	
-	GetWindowRect(hwndCtrl, &rect);
-	ScreenToClient(hwnd, (POINT *)&rect.left);
-	ScreenToClient(hwnd, (POINT *)&rect.right);
-	rect.top++;
-	
-	// Work out the coords of the tab contents
-	SendMessage(hwndCtrl, TCM_ADJUSTRECT, FALSE, (LPARAM)&rect);
-	
-	// Resize the tree control so that it fills the tab control.
-	hwndCtrl = GetDlgItem(hwnd, IDC_TREE1);
-	InflateRect(&rect, 1,1);
-	MoveWindow(hwndCtrl, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE);
-	
-	// Position the size-grip
+	if(wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
 	{
-		int width  = GetSystemMetrics(SM_CXVSCROLL);
-		int height = GetSystemMetrics(SM_CYHSCROLL);
-		
-		GetClientRect(hwnd, &rect);
-		
-		MoveWindow(hwndSizer, rect.right-width,	rect.bottom-height,width,height,TRUE);
-		
-	}
-	
-	GetWindowRect(hwndPin, &rect2);
-	OffsetRect(&rect2, -rect2.left, -rect2.top);
+		cx = LOWORD(lParam);
+		cy = HIWORD(lParam);
 
-	// Position the pin toolbar
-	//SetWindowPos(hwndPin,
-	//	HWND_TOP, rect.right-rect2.right, 1, rect2.right, rect2.bottom, 0);
-	MoveWindow(hwndPin, rect.right - rect2.right, 1, rect2.right, rect2.bottom, TRUE);
+		// Resize the right-hand tab control so that
+		// it fills the window
+		hwndCtrl = GetDlgItem(hwnd, IDC_TAB2);
+		GetWindowRect(hwndCtrl, &rect);
+		ScreenToClient(hwnd, (POINT *)&rect.left);
+		ScreenToClient(hwnd, (POINT *)&rect.right);
+
+		MoveWindow(hwndCtrl, rect.left, rect.top, cx - rect.left - nLeftBorder, cy - rect.top - nBottomBorder, TRUE);
+
+		GetWindowRect(hwndCtrl, &rect);
+		ScreenToClient(hwnd, (POINT *)&rect.left);
+		ScreenToClient(hwnd, (POINT *)&rect.right);
+		rect.top++;
+
+		// Work out the coords of the tab contents
+		SendMessage(hwndCtrl, TCM_ADJUSTRECT, FALSE, (LPARAM)&rect);
+
+		// Resize the tree control so that it fills the tab control.
+		hwndCtrl = GetDlgItem(hwnd, IDC_TREE1);
+		InflateRect(&rect, 1,1);
+		MoveWindow(hwndCtrl, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, TRUE);
+
+		// Position the size-grip
+		{
+			int width  = GetSystemMetrics(SM_CXVSCROLL);
+			int height = GetSystemMetrics(SM_CYHSCROLL);
+
+			GetClientRect(hwnd, &rect);
+
+			MoveWindow(hwndSizer, rect.right-width,	rect.bottom-height,width,height,TRUE);
+
+		}
+
+		GetWindowRect(hwndPin, &rect2);
+		OffsetRect(&rect2, -rect2.left, -rect2.top);
+
+		// Position the pin toolbar
+		//SetWindowPos(hwndPin,
+		//	HWND_TOP, rect.right-rect2.right, 1, rect2.right, rect2.bottom, 0);
+		MoveWindow(hwndPin, rect.right - rect2.right, 1, rect2.right, rect2.bottom, TRUE);
+	}
 	
 	return 0;
 }

@@ -54,7 +54,7 @@ BOOL FunkyList_DrawItem(HWND hwnd, UINT uCtrlId, DRAWITEMSTRUCT *dis)
 	case ODA_DRAWENTIRE:
 
 		// get the text string to display, and the item state.
-		SendMessage(hwndList, LB_GETTEXT, dis->itemID, (LONG)szText);
+		SendMessage(hwndList, LB_GETTEXT, dis->itemID, (LONG_PTR)szText);
 		dwStyle = (DWORD)dis->itemData;
 	
 		if((dis->itemState & ODS_SELECTED))

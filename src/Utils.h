@@ -23,6 +23,9 @@ BOOL EnableDebugPrivilege();
 
 TCHAR *GetVersionString(TCHAR *szFileName, TCHAR *szValue, TCHAR *szBuffer, ULONG nLength);
 
+BOOL ProcessArchMatches(HWND hwnd);
+WORD GetProcessorArchitecture();
+
 #ifdef __cplusplus
 }
 #endif
