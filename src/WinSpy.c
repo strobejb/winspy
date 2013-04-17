@@ -733,6 +733,8 @@ void DumpRect(HWND hwnd)
 //
 INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	UINT uLayout;
+
 	switch(msg)
 	{
 	case WM_INITDIALOG:
@@ -781,7 +783,9 @@ INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	// Update our layout based on new settings
 	case WM_SETTINGCHANGE:
+		uLayout = GetWindowLayout(hwnd);
 		WinSpyDlg_SizeContents(hwnd);
+		SetWindowLayout(hwnd, uLayout);
 		return TRUE;
 	}
 
