@@ -30,6 +30,7 @@ HWND		hwndToolTip;	// tooltip for main window controls only
 HINSTANCE	hInst;			// Current application instance
 
 TCHAR szHexFmt[]	= _T("%08X");
+TCHAR szPtrFmt[]	= _T("%08p");
 TCHAR szAppName[]	= _T("WinSpy++");
 
 //
@@ -85,7 +86,7 @@ void GetRemoteInfo(HWND hwnd)
 	if(spy_WndProc == 0 || b == FALSE || spy_fPassword)
 	{
 		//Remote Threads only available under Windows NT
-		if(GetVersion() < 0x80000000)	
+		if(GetVersion() < 0x80000000 && ProcessArchMatches(hwnd))
 		{
 			// doesn't work with debug info!!!!!!!!
 			// make sure we never call this function unless we have 
@@ -732,6 +733,8 @@ void DumpRect(HWND hwnd)
 //
 INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	UINT uLayout;
+
 	switch(msg)
 	{
 	case WM_INITDIALOG:
@@ -780,7 +783,9 @@ INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	// Update our layout based on new settings
 	case WM_SETTINGCHANGE:
+		uLayout = GetWindowLayout(hwnd);
 		WinSpyDlg_SizeContents(hwnd);
+		SetWindowLayout(hwnd, uLayout);
 		return TRUE;
 	}
 

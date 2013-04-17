@@ -64,7 +64,7 @@ void SetGeneralInfo(HWND hwnd)
 	}
 
 	//class name
-	GetClassName(hwnd, ach, sizeof ach);
+	GetClassName(hwnd, ach, sizeof(ach)/sizeof(TCHAR));
 
 	if(IsWindowUnicode(hwnd))	lstrcat(ach, _T("  (Unicode)"));
 
@@ -128,7 +128,7 @@ void SetGeneralInfo(HWND hwnd)
 	}
 	else					
 	{
-		wsprintf(ach, szHexFmt, spy_WndProc);
+		wsprintf(ach, szPtrFmt, spy_WndProc);
 		SetDlgItemText(hwndDlg, IDC_WINDOWPROC2, ach);
 
 		ShowDlgItem(hwndDlg, IDC_WINDOWPROC,  SW_HIDE);
@@ -136,15 +136,15 @@ void SetGeneralInfo(HWND hwnd)
 	}
 
 	//instance handle
-	wsprintf(ach, szHexFmt, GetWindowLongPtr(hwnd, GWLP_HINSTANCE));
+	wsprintf(ach, szPtrFmt, GetWindowLongPtr(hwnd, GWLP_HINSTANCE));
 	SetDlgItemText(hwndDlg, IDC_INSTANCE, ach);
 
 	//user data
-	wsprintf(ach, szHexFmt, GetWindowLongPtr(hwnd, GWLP_USERDATA));
+	wsprintf(ach, szPtrFmt, GetWindowLongPtr(hwnd, GWLP_USERDATA));
 	SetDlgItemText(hwndDlg, IDC_USERDATA, ach);
 
 	//control ID
-	wsprintf(ach, szHexFmt, GetWindowLong(hwnd, GWL_ID));
+	wsprintf(ach, szPtrFmt, GetWindowLongPtr(hwnd, GWLP_ID));
 	SetDlgItemText(hwndDlg, IDC_CONTROLID, ach);
 
 	//extra window bytes
@@ -158,7 +158,7 @@ void SetGeneralInfo(HWND hwnd)
 	while(numbytes != 0)
 	{
 		if(numbytes >= 4)
-			wsprintf(ach, _T("+%-8d  %08X"), i, GetWindowLong(hwnd, i));
+			wsprintf(ach, _T("+%-8d  %08p"), i, GetWindowLongPtr(hwnd, i));
 		else
 			wsprintf(ach, _T("+%-8d  %s"), i, _T("(Unavailable)"));
 

@@ -269,7 +269,7 @@ void SetClassInfo(HWND hwnd)
 	SetDlgItemText(hwndDlg, IDC_WINDOWBYTES, ach);
 
 	//menu (not implemented)
-	wsprintf(ach, szHexFmt, GetClassLongPtr(hwnd, GCLP_MENUNAME));
+	wsprintf(ach, szPtrFmt, GetClassLongPtr(hwnd, GCLP_MENUNAME));
 	SetDlgItemText(hwndDlg, IDC_MENUHANDLE, _T("(None)"));
 
 	//cursor handle
@@ -306,7 +306,7 @@ void SetClassInfo(HWND hwnd)
 	}
 	else					
 	{
-		wsprintf(ach, szHexFmt, spy_WndProc);
+		wsprintf(ach, szPtrFmt, spy_WndProc);
 		if(spy_WndProc != spy_WndClassEx.lpfnWndProc)
 			lstrcat(ach, _T(" (Subclassed)"));
 	}
@@ -319,14 +319,14 @@ void SetClassInfo(HWND hwnd)
 	if(spy_WndClassEx.lpfnWndProc == 0)
 		wsprintf(ach, _T("N/A"));
 	else
-		wsprintf(ach, szHexFmt, spy_WndClassEx.lpfnWndProc);
+		wsprintf(ach, szPtrFmt, spy_WndClassEx.lpfnWndProc);
 
 	SetDlgItemText(hwndDlg, IDC_CLASSPROC, ach);
 
 
 	
 	//instance handle
-	wsprintf(ach, szHexFmt, spy_WndClassEx.hInstance);
+	wsprintf(ach, szPtrFmt, spy_WndClassEx.hInstance);
 	SetDlgItemText(hwndDlg, IDC_INSTANCEHANDLE, ach);
 
 	//
