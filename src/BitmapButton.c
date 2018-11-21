@@ -25,7 +25,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include <uxtheme.h>
-#include <tmschema.h>
+#include <tmschema.h> // for VS 2017, instead use:     #include <vssym32.h>
 #include "BitmapButton.h"
 
 #pragma comment(lib,    "Uxtheme.lib")
