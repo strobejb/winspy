@@ -86,7 +86,7 @@ void GetRemoteInfo(HWND hwnd)
 	if(spy_WndProc == 0 || b == FALSE || spy_fPassword)
 	{
 		//Remote Threads only available under Windows NT
-		if(GetVersion() < 0x80000000 && ProcessArchMatches(hwnd))
+		if(ProcessArchMatches(hwnd))
 		{
 			// doesn't work with debug info!!!!!!!!
 			// make sure we never call this function unless we have 
@@ -397,7 +397,7 @@ HWND CreateTooltip(HWND hwndDlg)
 		ti.cbSize   = sizeof(ti);
 		ti.uFlags   = TTF_SUBCLASS | TTF_IDISHWND;
 		ti.hwnd     = hwnd;
-		ti.uId      = (UINT)GetDlgItem(hwnd, CtrlTips[i].uCtrlId);
+		ti.uId      = (UINT_PTR)GetDlgItem(hwnd, CtrlTips[i].uCtrlId);
 		ti.hinst    = hInst;
 		ti.lpszText = CtrlTips[i].szText;
 		ti.lParam   = 0;

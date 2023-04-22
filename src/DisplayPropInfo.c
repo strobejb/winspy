@@ -40,7 +40,7 @@ BOOL CALLBACK PropEnumProcEx(HWND hwnd, LPTSTR lpszString, HANDLE hData, ULONG_P
 	ListView_InsertItem(hwndList, &lvitem);
 	
 	// check that lpszString is a valid string, and not an ATOM in disguise
-	if(((DWORD)lpszString & 0xffff0000) == 0)
+	if(((DWORD_PTR)lpszString & 0xffff0000) == 0)
 	{
 		wsprintf(ach, _T("%08X (Atom)"), lpszString);
 		ListView_SetItemText(hwndList, 0, 1, ach);

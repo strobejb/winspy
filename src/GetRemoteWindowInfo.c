@@ -103,7 +103,7 @@ BOOL GetRemoteWindowInfo(HWND hwnd, WNDCLASSEX *pClass, WNDPROC *pProc, TCHAR *p
 	DWORD   dwThreadId;
 
 	// Calculate how many bytes the injected code takes
-	DWORD cbCodeSize = ((BYTE *)(DWORD)AfterThreadProc - (BYTE *)(DWORD)GetClassInfoExProc);
+	DWORD cbCodeSize = (DWORD)((BYTE *)(DWORD_PTR)AfterThreadProc - (BYTE *)(DWORD_PTR)GetClassInfoExProc);
 
 	//
 	// Setup the injection structure:
