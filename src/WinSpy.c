@@ -30,6 +30,7 @@ HWND		hwndToolTip;	// tooltip for main window controls only
 HINSTANCE	hInst;			// Current application instance
 
 TCHAR szHexFmt[]	= _T("%08X");
+TCHAR szPtrFmt[]	= _T("%08p");
 TCHAR szAppName[]	= _T("WinSpy++");
 
 //
@@ -85,7 +86,7 @@ void GetRemoteInfo(HWND hwnd)
 	if(spy_WndProc == 0 || b == FALSE || spy_fPassword)
 	{
 		//Remote Threads only available under Windows NT
-		if(GetVersion() < 0x80000000)	
+		if(GetVersion() < 0x80000000 && ProcessArchMatches(hwnd))
 		{
 			// doesn't work with debug info!!!!!!!!
 			// make sure we never call this function unless we have 
