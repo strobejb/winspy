@@ -56,8 +56,7 @@ DWORD InjectRemoteThread(HWND hwnd, LPTHREAD_START_ROUTINE lpCode, DWORD cbCodeS
 	// The address to which code will be copied in the remote process
 	DWORD *pdwRemoteCode;
 
-	// Total size of all memory copied into remote process
-	const int cbMemSize  = cbCodeSize + cbDataSize + 3;
+	const int cbCodeSizeAligned = (cbCodeSize + (sizeof(LONG_PTR)-1)) & ~ (sizeof(LONG_PTR)-1);
 	
 	// Find the process ID of the process which created the specified window
 	dwThreadId = GetWindowThreadProcessId(hwnd, &dwProcessId);
@@ -80,7 +79,7 @@ DWORD InjectRemoteThread(HWND hwnd, LPTHREAD_START_ROUTINE lpCode, DWORD cbCodeS
 	if(pVirtualAllocEx == 0 || pVirtualFreeEx == 0)
 		return FALSE;
 
-	pdwRemoteCode = pVirtualAllocEx(hProcess, 0, cbMemSize, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+	pdwRemoteCode = pVirtualAllocEx(hProcess, 0, cbCodeSizeAligned + cbDataSize, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 
 	if(pdwRemoteCode == 0)
 		return FALSE;
@@ -89,8 +88,8 @@ DWORD InjectRemoteThread(HWND hwnd, LPTHREAD_START_ROUTINE lpCode, DWORD cbCodeS
 	WriteProcessMemory(hProcess, pdwRemoteCode, lpCode, (SIZE_T)cbCodeSize, &dwWritten);
 
 	// Write a copy of the INJTHREAD to the remote process. This structure
-	// MUST start on a 32bit boundary
-	pRemoteData = (void *)((BYTE *)pdwRemoteCode + ((cbCodeSize + 4) & ~ 3));
+	// MUST start on a 32bit/64bit boundary
+	pRemoteData = (void *)((BYTE *)pdwRemoteCode + cbCodeSizeAligned);
 	
 	// Put DATA in the remote thread's memory block
 	WriteProcessMemory(hProcess, pRemoteData, lpData, cbDataSize, &dwWritten);
