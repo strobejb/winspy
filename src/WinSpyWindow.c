@@ -67,7 +67,8 @@ void GetWorkArea(RECT *prcWinRect, RECT *prcWorkArea)
 	HMODULE		hUser32;
 	MONITORINFO mi;
 
-	hUser32 = GetModuleHandle(_T("USER32.DLL"));
+	if((hUser32 = GetModuleHandle(_T("USER32.DLL"))) == 0)
+		return;
 	
 	// if we havn't already tried, 
 	if(fFindMultiMon == TRUE)
@@ -104,7 +105,8 @@ void ForceVisibleDisplay(HWND hwnd)
 
 	GetWindowRect(hwnd, &rect);
 
-	hUser32 = GetModuleHandle(_T("USER32.DLL"));
+	if ((hUser32 = GetModuleHandle(_T("USER32.DLL"))) == 0)
+		return;
 	
 	pMonitorFromRect = (MFR_PROC)GetProcAddress(hUser32, "MonitorFromRect");
 
@@ -267,7 +269,7 @@ void WinSpyDlg_SizeContents(HWND hwnd)
 	// HARD-CODED sizes for each window layout.
 	// These are DIALOG UNITS, so it's not too bad..
 	duMinimized.cx = 254;
-	duMinimized.cy = 25;//6;
+	duMinimized.cy = 28;//6;
 
 	duNormal.cx    = duMinimized.cx;
 	duNormal.cy    = 251;

@@ -133,7 +133,7 @@ INT_PTR CALLBACK StyleEditProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPara
 		{
 		case IDC_APPLY:
 
-			dwStyle = GetDlgItemBaseInt(hwnd, IDC_EDIT1, 16);
+			dwStyle = (DWORD)GetDlgItemBaseInt(hwnd, IDC_EDIT1, 16);
 
 			if(state->fExtended)
 				SetWindowLong(state->hwndTarget, GWL_EXSTYLE, dwStyle);
@@ -169,7 +169,7 @@ INT_PTR CALLBACK StyleEditProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPara
 				
 				hwndList = GetDlgItem(hwnd, IDC_LIST1);
 
-				dwStyle  = GetDlgItemBaseInt(hwnd, IDC_EDIT1, 16);
+				dwStyle  = (DWORD)GetDlgItemBaseInt(hwnd, IDC_EDIT1, 16);
 
 				caretidx = (int)SendMessage(hwndList, LB_GETCARETINDEX, 0, 0);
 				cursel   = (int)SendMessage(hwndList, LB_GETSEL, caretidx, 0);

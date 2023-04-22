@@ -517,7 +517,7 @@ LRESULT CALLBACK ClassDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam
 		{
 			SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
 			SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
-			return (BOOL)GetSysColorBrush(COLOR_WINDOW);
+			return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
 		}
 		else
 			return FALSE;
@@ -629,7 +629,7 @@ LRESULT CALLBACK ProcessDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
 		{
 			SetTextColor ((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
 			SetBkColor   ((HDC)wParam, GetSysColor(COLOR_WINDOW));
-			return (BOOL)GetSysColorBrush(COLOR_WINDOW);
+			return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
 		}
 
 

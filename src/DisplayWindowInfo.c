@@ -94,10 +94,10 @@ void SetWindowInfo(HWND hwnd)
 	ListView_DeleteAllItems(hwndList2);
 
 	// Get all children of the window
-	EnumChildWindows(hwnd, ChildWindowProc, (LONG)hwndList1);
+	EnumChildWindows(hwnd, ChildWindowProc, (LPARAM)hwndList1);
 
 	// Get children of it's PARENT (i.e, it's siblings!)
-	EnumChildWindows(GetParent(hwnd), SiblingWindowProc, (LONG)hwndList2);
+	EnumChildWindows(GetParent(hwnd), SiblingWindowProc, (LPARAM)hwndList2);
 
 	// Set the Parent hyperlink
 	wsprintf(ach, szHexFmt, GetParent(hwnd));

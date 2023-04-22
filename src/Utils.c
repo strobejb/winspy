@@ -102,16 +102,16 @@ int WINAPI GetRectWidth(RECT *rect)
 //	Convert the specified string (with a hex-number in it)
 //  into the equivalent hex-value
 //
-UINT _tstrtoib16(TCHAR *szHexStr)
+UINT_PTR _tstrtoib16(TCHAR *szHexStr)
 {
-	UINT  num = 0;
+	UINT_PTR  num = 0;
 
 	TCHAR *hexptr = szHexStr;
-	UINT  ch = *hexptr++;
+	UINT_PTR  ch = *hexptr++;
 
-	while(isxdigit(ch))
+	while(isxdigit((int)ch))
 	{
-		UINT x = ch - _T('0');
+		UINT_PTR x = ch - _T('0');
 		if(x > 9 && x <= 42) x -= 7;		//A-Z
 		else if(x > 42)   x -= 39;			//a-z
 					
@@ -122,7 +122,7 @@ UINT _tstrtoib16(TCHAR *szHexStr)
 	return num;
 }
 
-DWORD GetNumericValue(HWND hwnd, int base)
+DWORD_PTR GetNumericValue(HWND hwnd, int base)
 {
 	TCHAR szAddressText[128];
 
@@ -143,9 +143,9 @@ DWORD GetNumericValue(HWND hwnd, int base)
 	}
 }
 
-DWORD GetDlgItemBaseInt(HWND hwnd, UINT ctrlid, int base)
+DWORD_PTR GetDlgItemBaseInt(HWND hwnd, UINT ctrlid, int base)
 {
-	return (DWORD)GetNumericValue(GetDlgItem(hwnd, ctrlid), base);
+	return (DWORD_PTR)GetNumericValue(GetDlgItem(hwnd, ctrlid), base);
 }
 
 //

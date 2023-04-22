@@ -38,7 +38,7 @@ extern DialogTab WinSpyTab[];
 //
 typedef struct 
 {
-	UINT    style;
+	UINT_PTR    style;
 	LPCTSTR szName;
 
 } StyleLookupType;
@@ -66,7 +66,7 @@ typedef struct
 //
 //  e.g. STYLE_(WS_CHILD)  ->  WS_CHILD, "WS_CHILD"
 //
-#define STYLE_(style) (UINT)style, _T(#style)
+#define STYLE_(style) (UINT_PTR)style, (LPCTSTR)_T(#style)
 
 //
 //	Use this structure to list each window class with its

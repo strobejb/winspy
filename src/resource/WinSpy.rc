@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include "windows.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -23,6 +23,9 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 // Dialog
 //
+#ifndef IDC_STATIC
+#define IDC_STATIC -1
+#endif
 
 IDD_TAB_GENERAL DIALOGEX 0, 0, 230, 170
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
