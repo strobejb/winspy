@@ -44,4 +44,4 @@ jobs:
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
    
     - name: Zip Folder
-        run: zip -r ${{ github.event.repository.name }}.zip . -x '*.exe*' 
+      run: zip -r ${{ github.event.repository.name }}.zip . -x '*.exe*' 
