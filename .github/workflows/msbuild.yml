@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: MSBuild
+name: WinSpy
 
 on:
   push:
@@ -25,17 +25,19 @@ permissions:
 
 jobs:
   build:
+    #strategy:
+    #  matrix:
+    #    configuration: [Release]
+    #    platform: [x64, x86]
+        
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v3
 
+   
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
-
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -43,7 +45,8 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: msbuild /verbosity:diag /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
    
-    - uses: actions/upload-artifact@v2
+    - name: Package
+      uses: actions/upload-artifact@v2
       with:
         name: WinSoy
-        path: "WinSpy/bin/Release/WinSpy.exe"
+        path: ${{env.SOLUTION_Name}}"\\bin\\Release\\WinSpy.exe"
