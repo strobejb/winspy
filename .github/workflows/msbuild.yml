@@ -49,5 +49,5 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: WinSoy
-        path: ${{env.TargetPath}}
+        path: ${{TargetPath}}
         #${{env.SOLUTION_NAME}}"\\bin\\x64\\Release\\WinSpy.exe"
