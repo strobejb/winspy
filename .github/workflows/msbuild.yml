@@ -49,4 +49,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: WinSpy
-        path: bin\x64\Release\winspy.exe
+        path: bin\x86\Release\winspy.exe
