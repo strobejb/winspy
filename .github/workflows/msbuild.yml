@@ -48,5 +48,5 @@ jobs:
     - name: Package
       uses: actions/upload-artifact@v2
       with:
-        name: WinSoy
+        name: WinSpy
         path: "WinSpy\\bin\\x64\\Release\\WinSpy.exe"
