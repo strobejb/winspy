@@ -48,5 +48,5 @@ jobs:
     - name: Package
       uses: actions/upload-artifact@v2
       with:
-        name: WinSpy
+        name: WinSpy_${{matrix.configuration}}_${{matrix.platform}}
         path: bin\${{matrix.platform}}\${{matrix.configuration}}\winspy.exe
