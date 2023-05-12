@@ -1,0 +1,77 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Create Release
+
+on:
+  release:
+    types:
+      - created
+      
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+  TARGET_FILENAME: winspy.exe
+  VERSION_H: src\\resource\\version.h
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Release]
+        platform: [x64, x86]
+        
+    runs-on: windows-latest    
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: Set variables
+      run: 
+        echo "TARGET_PATH=bin\${{matrix.platform}}\${{matrix.configuration}}\${{env.TARGET_FILENAME}}" 
+             "PACKAGE_NAME=./WinSpy_${{matrix.configuration}}_${{matrix.platform}}.zip" 
+             | Out-File -FilePath $env:GITHUB_ENV
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+      
+    - name: Increment version
+      shell: python
+      run: |
+        import os
+        import re
+        r = re.match(r'v(\d+)\.(\d+)\.(\d+)', '${{github.ref_name}}')
+        path = os.path.abspath("${{env.VERSION_H}}")
+        with open(path, "w") as f:
+          print("#define BUILD_MAJ", r.group(1), file=f)
+          print("#define BUILD_MIN", r.group(2), file=f)
+          print("#define BUILD_PAT", r.group(3), file=f)
+          print("#define BUILD_NUM", ${{github.run_number}}, file=f)        
+          print("Writing: ", path)
+          
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m 
+        /p:Configuration=${{matrix.configuration}} 
+        /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+    
+    - name: Package
+      run: 
+        $compress = @{
+          Path = "${{env.TARGET_PATH}}", "LICENSE", "README.md";
+          CompressionLevel = "Optimal";
+          DestinationPath = "${{env.PACKAGE_NAME}}"
+        };
+        Compress-Archive @compress
+      
+    - name: Publish
+      run: gh release upload ${{github.ref_name}} ${{env.PACKAGE_NAME}}      
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+      
