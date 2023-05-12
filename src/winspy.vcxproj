@@ -219,9 +219,6 @@
     <ClInclude Include="WinSpy.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="resource\WinSpy.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="resource\bitmap1.bmp" />
     <None Include="resource\bitmap2.bmp" />
     <None Include="resource\bitmap3.bmp" />
@@ -243,6 +240,10 @@
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="resource\winspy.exe.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resource\version.rc" />
+    <ResourceCompile Include="resource\WinSpy.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
