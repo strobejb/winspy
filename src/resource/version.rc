@@ -1,0 +1,46 @@
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+#include "version.h"
+
+#define STRINGIZE_(s) #s
+#define Q(s) STRINGIZE_(s)
+
+#define BUILD_STR Q(BUILD_MAJ) "." Q(BUILD_MIN) "." Q(BUILD_PAT)
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION BUILD_MAJ,BUILD_MIN,BUILD_PAT,BUILD_NUM
+ PRODUCTVERSION BUILD_MAJ,BUILD_MIN,BUILD_PAT
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "CompanyName", "Catch22 Productions"
+            VALUE "FileDescription", "WinSpy"
+            VALUE "FileVersion", BUILD_STR "." Q(BUILD_NUM) "\0"
+            VALUE "InternalName", "winspy.exe"
+            VALUE "LegalCopyright", "Copyright (C) 2001-2023"
+            VALUE "OriginalFilename", "winspy.exe"
+            VALUE "ProductName", "WinSpy"
+            VALUE "ProductVersion", BUILD_STR "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+#endif
+
