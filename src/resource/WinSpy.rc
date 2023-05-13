@@ -546,7 +546,7 @@ IDB_SELBOX              PNG                     "selbox.png"
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
-
+#include "version.rc"
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
