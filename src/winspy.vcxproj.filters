@@ -18,9 +18,6 @@
     <ClCompile Include="BitmapButton.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CatpureWindow.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DisplayClassInfo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,6 +99,9 @@
     <ClCompile Include="LoadPNG.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CaptureWindow.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AggressiveOptimize.h">
@@ -132,6 +132,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource\version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

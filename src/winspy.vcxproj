@@ -177,7 +177,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BitmapButton.c" />
-    <ClCompile Include="CatpureWindow.c" />
+    <ClCompile Include="CaptureWindow.c" />
     <ClCompile Include="DisplayClassInfo.c" />
     <ClCompile Include="DisplayGeneralInfo.c" />
     <ClCompile Include="DisplayProcessInfo.c" />
@@ -214,6 +214,7 @@
     <ClInclude Include="InjectThread.h" />
     <ClInclude Include="RegHelper.h" />
     <ClInclude Include="resource\resource.h" />
+    <ClInclude Include="resource\version.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="WindowFromPointEx.h" />
     <ClInclude Include="WinSpy.h" />
