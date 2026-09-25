@@ -63,9 +63,6 @@
     <ClCompile Include="Options.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RegHelper.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StaticCtrl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,9 +114,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InjectThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RegHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils.h">

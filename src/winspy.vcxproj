@@ -202,7 +202,6 @@
     <ClCompile Include="InjectThread.c" />
     <ClCompile Include="LoadPNG.cpp" />
     <ClCompile Include="Options.c" />
-    <ClCompile Include="RegHelper.c" />
     <ClCompile Include="StaticCtrl.c" />
     <ClCompile Include="StyleEdit.c" />
     <ClCompile Include="TabCtrlUtils.c" />
@@ -220,7 +219,6 @@
     <ClInclude Include="CaptureWindow.h" />
     <ClInclude Include="FindTool.h" />
     <ClInclude Include="InjectThread.h" />
-    <ClInclude Include="RegHelper.h" />
     <ClInclude Include="resource\resource.h" />
     <ClInclude Include="resource\version.h" />
     <ClInclude Include="Utils.h" />
