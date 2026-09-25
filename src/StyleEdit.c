@@ -136,7 +136,21 @@ INT_PTR CALLBACK StyleEditProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPara
 			dwStyle = (DWORD)GetDlgItemBaseInt(hwnd, IDC_EDIT1, 16);
 
 			if(state->fExtended)
+			{
+				// WS_EX_TOPMOST cannot be changed with SetWindowLong; per MSDN
+				// it must be added/removed with SetWindowPos (issue #14)
+				DWORD dwOldEx = GetWindowLong(state->hwndTarget, GWL_EXSTYLE);
+
+				if((dwOldEx ^ dwStyle) & WS_EX_TOPMOST)
+				{
+					SetWindowPos(state->hwndTarget,
+						(dwStyle & WS_EX_TOPMOST) ? HWND_TOPMOST : HWND_NOTOPMOST,
+						0,0,0,0,
+						SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+				}
+
 				SetWindowLong(state->hwndTarget, GWL_EXSTYLE, dwStyle);
+			}
 			else
 				SetWindowLong(state->hwndTarget, GWL_STYLE, dwStyle);
 			
