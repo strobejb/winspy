@@ -11,7 +11,7 @@
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 #define _WIN32_WINDOWS 0x400
-#define _WIN32_WINNT 0x400
+#define _WIN32_WINNT 0x0501
 
 #include <windows.h>
 #include <shellapi.h>
@@ -69,6 +69,47 @@ extern TCHAR szPath[];
 }*/
 
 //
+//	Raise a window above its siblings/other windows and activate it.
+//	A plain SetWindowPos(HWND_TOP) does nothing for minimized windows, doesn't
+//	raise the top-level parent of a child window, and doesn't activate (issue #15)
+//
+static void BringWindowToFront(HWND hwnd)
+{
+	HWND  hwndRoot = GetAncestor(hwnd, GA_ROOT);
+	DWORD tidFore, tidThis;
+	BOOL  fAttached = FALSE;
+
+	if(hwndRoot == NULL)
+		hwndRoot = hwnd;
+
+	// raise a child window above its siblings
+	if(hwndRoot != hwnd)
+		SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+	if(IsIconic(hwndRoot))
+		ShowWindow(hwndRoot, SW_RESTORE);
+
+	SetWindowPos(hwndRoot, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+
+	if(!SetForegroundWindow(hwndRoot))
+	{
+		// we weren't allowed to take the foreground: share input state with
+		// the current foreground thread and retry
+		tidThis = GetCurrentThreadId();
+		tidFore = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+
+		if(tidFore && tidFore != tidThis)
+			fAttached = AttachThreadInput(tidThis, tidFore, TRUE);
+
+		BringWindowToTop(hwndRoot);
+		SetForegroundWindow(hwndRoot);
+
+		if(fAttached)
+			AttachThreadInput(tidThis, tidFore, FALSE);
+	}
+}
+
+//
 //
 //
 UINT WinSpy_PopupCommandHandler(HWND hwndDlg, UINT uCmdId, HWND hwndTarget)
@@ -123,7 +164,7 @@ UINT WinSpy_PopupCommandHandler(HWND hwndDlg, UINT uCmdId, HWND hwndTarget)
 
 	case IDM_POPUP_TOFRONT:
 
-		SetWindowPos(hwndTarget, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		BringWindowToFront(hwndTarget);
 		return 0;
 
 	case IDM_POPUP_TOBACK:
