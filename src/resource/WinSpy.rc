@@ -415,9 +415,7 @@ END
 // Bitmap
 //
 
-IDB_DRAGTOOL1           BITMAP                  "bitmap1.bmp"
 IDB_WINDOW_INVISIBLE    BITMAP                  "bitmap6.bmp"
-IDB_DRAGTOOL2           BITMAP                  "bitmap2.bmp"
 IDB_WINDOW_VISIBLE      BITMAP                  "bitmap5.bmp"
 IDB_CHECK1              BITMAP                  "bitmap3.bmp"
 IDB_CHECK2              BITMAP                  "bitmap4.bmp"
@@ -535,6 +533,8 @@ END
 //
 
 IDB_SELBOX              PNG                     "selbox.png"
+IDB_DRAGTOOL1           PNG                     "finder1.png"
+IDB_DRAGTOOL2           PNG                     "finder2.png"
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 

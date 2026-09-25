@@ -29,6 +29,7 @@ WORD GetProcessorArchitecture();
 int     GetWindowDpi(HWND hwnd);
 int     DpiScale(HWND hwnd, int value);
 HBITMAP CreateDpiScaledBitmap(HBITMAP hbmSrc, int dpi, int stretchMode);
+HBITMAP CreateDpiScaledAlphaBitmap(HBITMAP hbmSrc, int dpi);
 
 #ifdef __cplusplus
 }

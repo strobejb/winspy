@@ -133,12 +133,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="resource\bitmap1.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\bitmap2.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="resource\bitmap3.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -185,6 +179,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="selbox.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder1.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder2.png">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

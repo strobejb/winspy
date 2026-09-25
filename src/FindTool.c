@@ -48,17 +48,25 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
+#include <uxtheme.h>
 #include "FindTool.h"
 #include "resource.h"
 #include "WinSpy.h"
 #include "Utils.h"
 
+#pragma comment(lib, "Msimg32.lib")
+#pragma comment(lib, "Uxtheme.lib")
+
+HBITMAP LoadPNGImage(UINT id, void **bits);
+
 #define INVERT_BORDER 3
 
 // Property names used to stash a per-control, DPI-scaled copy of the
-// finder-tool bitmaps on the static control itself.
-#define PROP_DRAG1_SCALED  _T("WinSpyDrag1Scaled")
-#define PROP_DRAG2_SCALED  _T("WinSpyDrag2Scaled")
+// finder-tool bitmaps on the static control itself, plus which of the
+// two (possibly scaled) bitmaps is currently on display.
+#define PROP_DRAG1_SCALED   _T("WinSpyDrag1Scaled")
+#define PROP_DRAG2_SCALED   _T("WinSpyDrag2Scaled")
+#define PROP_CURRENT_BITMAP _T("WinSpyDragCurrent")
 
 HWND WindowFromPointEx(POINT pt, BOOL fShowHidden);
 void CaptureWindow(HWND hwndParent, HWND hwnd);
@@ -174,19 +182,30 @@ void FlashWindowBorder(HWND hwnd, BOOL fShowHidden)
 	}
 }
 
+// Whether uxtheme.dll is actually loaded, so DrawThemeParentBackground can
+// be called safely (it's delay-loaded - calling it with no uxtheme.dll
+// present would raise a delay-load SEH exception). Same check BitmapButton.c
+// uses for its own theme calls.
+static BOOL fThemeApiAvailable;
+
 void LoadFinderResources()
 {
-	hBitmapDrag1 = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(IDB_DRAGTOOL1));
-	hBitmapDrag2 = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(IDB_DRAGTOOL2));
+	void *pvBits;
 
-	hCursor = LoadCursor(GetModuleHandle(0),      MAKEINTRESOURCE(IDC_CURSOR1));
+	hBitmapDrag1 = LoadPNGImage(IDB_DRAGTOOL1, &pvBits);
+	hBitmapDrag2 = LoadPNGImage(IDB_DRAGTOOL2, &pvBits);
+
+	hCursor = LoadCursor(GetModuleHandle(0), MAKEINTRESOURCE(IDC_CURSOR1));
+
+	fThemeApiAvailable = (GetModuleHandle(_T("uxtheme.dll")) != NULL);
 }
 
 //
 // Set the finder-tool bitmap on a control, scaling it for the control's
-// current monitor DPI first (CreateDpiScaledBitmap, in Utils.c) and
+// current monitor DPI first (CreateDpiScaledAlphaBitmap, in Utils.c) and
 // caching the scaled copy as a window property so it isn't recreated on
-// every drag/drop.
+// every drag/drop. The control paints itself (see StaticProc's WM_PAINT) -
+// this just records which bitmap is now current and invalidates it.
 //
 static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP hbmSrc)
 {
@@ -194,16 +213,17 @@ static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP hbmSrc)
 
 	if(hbmScaled == NULL)
 	{
-		hbmScaled = CreateDpiScaledBitmap(hbmSrc, GetWindowDpi(hwnd), HALFTONE);
+		hbmScaled = CreateDpiScaledAlphaBitmap(hbmSrc, GetWindowDpi(hwnd));
 
 		// Only cache (and later free) a genuinely new bitmap - if no
-		// scaling was needed, CreateDpiScaledBitmap hands back hbmSrc
+		// scaling was needed, CreateDpiScaledAlphaBitmap hands back hbmSrc
 		// itself, which is owned by LoadFinderResources/FreeFinderResources.
 		if(hbmScaled != hbmSrc)
 			SetProp(hwnd, propName, (HANDLE)hbmScaled);
 	}
 
-	SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hbmScaled);
+	SetProp(hwnd, PROP_CURRENT_BITMAP, (HANDLE)hbmScaled);
+	InvalidateRect(hwnd, NULL, FALSE);
 }
 
 void FreeFinderResources()
@@ -481,6 +501,46 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		return 0;
 
+	case WM_ERASEBKGND:
+
+		// Background is painted as part of WM_PAINT, right before the
+		// alpha-blended bitmap - avoids a double-paint/flicker here.
+		return 1;
+
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+		RECT rc;
+		HBITMAP hbmCur = (HBITMAP)GetProp(hwnd, PROP_CURRENT_BITMAP);
+
+		GetClientRect(hwnd, &rc);
+
+		// Paint whatever the parent would really have drawn here first,
+		// so the bitmap's transparent/rounded-corner pixels blend with
+		// the *actual* themed background (tab page, dialog, dark mode,
+		// etc.) instead of a hardcoded guess at its colour.
+		if(!fThemeApiAvailable || FAILED(DrawThemeParentBackground(hwnd, hdc, &rc)))
+			FillRect(hdc, &rc, GetSysColorBrush(COLOR_BTNFACE));
+
+		if(hbmCur != NULL)
+		{
+			BITMAP bm;
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			HBITMAP hbmOld = SelectObject(hdcMem, hbmCur);
+			BLENDFUNCTION bf = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
+
+			GetObject(hbmCur, sizeof(bm), &bm);
+			AlphaBlend(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, bf);
+
+			SelectObject(hdcMem, hbmOld);
+			DeleteDC(hdcMem);
+		}
+
+		EndPaint(hwnd, &ps);
+		return 0;
+	}
+
 	case WM_NCDESTROY:
 	{
 		// Free this control's cached DPI-scaled bitmaps, if any
@@ -522,10 +582,11 @@ BOOL MakeFinderTool(HWND hwnd, WNDFINDPROC wfp)
 	// Turn OFF styles we don't want
 	dwStyle &= ~(SS_RIGHT | SS_CENTER | SS_CENTERIMAGE);
 	dwStyle &= ~(SS_ICON | SS_SIMPLE | SS_LEFTNOWORDWRAP);
+	dwStyle &= ~(SS_BITMAP);
 
-	// Turn ON styles we must have
+	// Turn ON styles we must have - the control paints itself entirely
+	// (see StaticProc's WM_PAINT), so it no longer needs SS_BITMAP.
 	dwStyle |= SS_NOTIFY;
-	dwStyle |= SS_BITMAP;
 
 	// Now apply them..
 	SetWindowLong(hwnd, GWL_STYLE, dwStyle);
