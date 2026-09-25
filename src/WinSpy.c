@@ -15,6 +15,9 @@
 #include <windows.h>
 #include <tchar.h>
 #include <commctrl.h>
+#include <objbase.h>
+
+#pragma comment(lib, "Ole32.lib")
 
 #include "resource.h"
 #include "WinSpy.h"
@@ -884,6 +887,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	EnableDebugPrivilege();
 
+	// Needed for WIC (LoadPNGImage, used by the finder tool and the
+	// drag-select box overlay) - both silently fail to decode without it.
+	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
 	InitCommonControls();//Ex(&ice);
 
 	RegisterDialogClass(_T("WinSpy"));
@@ -923,6 +930,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	SaveSettings();
+
+	CoUninitialize();
 
 	return 0;
 }

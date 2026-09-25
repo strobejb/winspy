@@ -226,8 +226,6 @@
     <ClInclude Include="WinSpy.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resource\bitmap1.bmp" />
-    <None Include="resource\bitmap2.bmp" />
     <None Include="resource\bitmap3.bmp" />
     <None Include="resource\bitmap4.bmp" />
     <None Include="resource\bitmap5.bmp" />
@@ -244,6 +242,8 @@
     <None Include="resource\selbox.png" />
     <None Include="resource\selbox2.png" />
     <None Include="selbox.png" />
+    <None Include="resource\finder1.png" />
+    <None Include="resource\finder2.png" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="resource\winspy.exe.manifest" />

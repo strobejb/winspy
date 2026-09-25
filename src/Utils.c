@@ -410,3 +410,67 @@ HBITMAP CreateDpiScaledBitmap(HBITMAP hbmSrc, int dpi, int stretchMode)
 
 	return hbmDst;
 }
+
+//
+// Like CreateDpiScaledBitmap, but for 32bpp per-pixel-alpha (premultiplied)
+// bitmaps that will be drawn with AlphaBlend. The destination must be a
+// real 32bpp DIB section - a screen-compatible bitmap doesn't reliably
+// preserve the alpha channel's meaning through StretchBlt/AlphaBlend.
+//
+HBITMAP CreateDpiScaledAlphaBitmap(HBITMAP hbmSrc, int dpi)
+{
+	BITMAP bm;
+	BITMAPINFO bmi = { 0 };
+	HDC hdcScreen, hdcSrc, hdcDst;
+	HBITMAP hbmDst, hbmOldSrc, hbmOldDst;
+	void *pvBits;
+	int cxNew, cyNew;
+
+	if(dpi <= USER_DEFAULT_SCREEN_DPI || hbmSrc == NULL)
+		return hbmSrc;
+
+	if(!GetObject(hbmSrc, sizeof(bm), &bm))
+		return hbmSrc;
+
+	cxNew = MulDiv(bm.bmWidth,  dpi, USER_DEFAULT_SCREEN_DPI);
+	cyNew = MulDiv(bm.bmHeight, dpi, USER_DEFAULT_SCREEN_DPI);
+
+	bmi.bmiHeader.biSize        = sizeof(bmi.bmiHeader);
+	bmi.bmiHeader.biWidth       = cxNew;
+	bmi.bmiHeader.biHeight      = -cyNew; // top-down
+	bmi.bmiHeader.biPlanes      = 1;
+	bmi.bmiHeader.biBitCount    = 32;
+	bmi.bmiHeader.biCompression = BI_RGB;
+
+	hdcScreen = GetDC(0);
+	hbmDst    = CreateDIBSection(hdcScreen, &bmi, DIB_RGB_COLORS, &pvBits, NULL, 0);
+
+	if(hbmDst == NULL)
+	{
+		ReleaseDC(0, hdcScreen);
+		return hbmSrc;
+	}
+
+	hdcSrc = CreateCompatibleDC(hdcScreen);
+	hdcDst = CreateCompatibleDC(hdcScreen);
+
+	hbmOldSrc = SelectObject(hdcSrc, hbmSrc);
+	hbmOldDst = SelectObject(hdcDst, hbmDst);
+
+	// HALFTONE would corrupt the alpha channel here (GDI dithers all 4
+	// bytes per pixel as if they were colour, with no idea the 4th is
+	// alpha) - COLORONCOLOR does a plain per-pixel copy/replicate that
+	// leaves the premultiplied alpha bytes intact.
+	SetStretchBltMode(hdcDst, COLORONCOLOR);
+	SetBrushOrgEx(hdcDst, 0, 0, NULL);
+	StretchBlt(hdcDst, 0, 0, cxNew, cyNew, hdcSrc, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+
+	SelectObject(hdcSrc, hbmOldSrc);
+	SelectObject(hdcDst, hbmOldDst);
+
+	DeleteDC(hdcSrc);
+	DeleteDC(hdcDst);
+	ReleaseDC(0, hdcScreen);
+
+	return hbmDst;
+}
