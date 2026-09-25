@@ -47,12 +47,24 @@
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 
+// Needed for GetDpiForWindow() (issue #11: the finder-tool bitmaps are
+// fixed-size resources that no longer get scaled up by DWM now that the
+// app is per-monitor DPI aware, so we scale them ourselves)
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
+
 #include <windows.h>
 #include "FindTool.h"
 #include "resource.h"
 #include "WinSpy.h"
 
 #define INVERT_BORDER 3
+
+// Property names used to stash a per-control, DPI-scaled copy of the
+// finder-tool bitmaps on the static control itself.
+#define PROP_DRAG1_SCALED  _T("WinSpyDrag1Scaled")
+#define PROP_DRAG2_SCALED  _T("WinSpyDrag2Scaled")
 
 HWND WindowFromPointEx(POINT pt, BOOL fShowHidden);
 void CaptureWindow(HWND hwndParent, HWND hwnd);
@@ -176,6 +188,82 @@ void LoadFinderResources()
 	hCursor = LoadCursor(GetModuleHandle(0),      MAKEINTRESOURCE(IDC_CURSOR1));
 }
 
+//
+// Return a copy of hbmSrc scaled from 96 dpi up to the given dpi.
+// A SS_BITMAP static control auto-sizes itself to whatever bitmap it's
+// given, so scaling the bitmap is enough to make the control the right
+// size too. Returns hbmSrc itself (not a copy) when no scaling is needed.
+//
+static HBITMAP CreateDpiScaledBitmap(HBITMAP hbmSrc, int dpi)
+{
+	BITMAP bm;
+	HDC hdcScreen, hdcSrc, hdcDst;
+	HBITMAP hbmDst, hbmOldSrc, hbmOldDst;
+	int cxNew, cyNew;
+
+	if(dpi <= USER_DEFAULT_SCREEN_DPI || hbmSrc == NULL)
+		return hbmSrc;
+
+	if(!GetObject(hbmSrc, sizeof(bm), &bm))
+		return hbmSrc;
+
+	cxNew = MulDiv(bm.bmWidth,  dpi, USER_DEFAULT_SCREEN_DPI);
+	cyNew = MulDiv(bm.bmHeight, dpi, USER_DEFAULT_SCREEN_DPI);
+
+	hdcScreen = GetDC(0);
+	hdcSrc    = CreateCompatibleDC(hdcScreen);
+	hdcDst    = CreateCompatibleDC(hdcScreen);
+	hbmDst    = CreateCompatibleBitmap(hdcScreen, cxNew, cyNew);
+
+	if(hdcSrc == NULL || hdcDst == NULL || hbmDst == NULL)
+	{
+		if(hbmDst) DeleteObject(hbmDst);
+		if(hdcSrc) DeleteDC(hdcSrc);
+		if(hdcDst) DeleteDC(hdcDst);
+		ReleaseDC(0, hdcScreen);
+		return hbmSrc;
+	}
+
+	hbmOldSrc = SelectObject(hdcSrc, hbmSrc);
+	hbmOldDst = SelectObject(hdcDst, hbmDst);
+
+	SetStretchBltMode(hdcDst, HALFTONE);
+	SetBrushOrgEx(hdcDst, 0, 0, NULL);
+	StretchBlt(hdcDst, 0, 0, cxNew, cyNew, hdcSrc, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+
+	SelectObject(hdcSrc, hbmOldSrc);
+	SelectObject(hdcDst, hbmOldDst);
+
+	DeleteDC(hdcSrc);
+	DeleteDC(hdcDst);
+	ReleaseDC(0, hdcScreen);
+
+	return hbmDst;
+}
+
+//
+// Set the finder-tool bitmap on a control, scaling it for the control's
+// current monitor DPI first and caching the scaled copy as a window
+// property so it isn't recreated on every drag/drop.
+//
+static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP hbmSrc)
+{
+	HBITMAP hbmScaled = (HBITMAP)GetProp(hwnd, propName);
+
+	if(hbmScaled == NULL)
+	{
+		hbmScaled = CreateDpiScaledBitmap(hbmSrc, GetDpiForWindow(hwnd));
+
+		// Only cache (and later free) a genuinely new bitmap - if no
+		// scaling was needed, CreateDpiScaledBitmap hands back hbmSrc
+		// itself, which is owned by LoadFinderResources/FreeFinderResources.
+		if(hbmScaled != hbmSrc)
+			SetProp(hwnd, propName, (HANDLE)hbmScaled);
+	}
+
+	SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hbmScaled);
+}
+
 void FreeFinderResources()
 {
 	DeleteObject(hBitmapDrag1);
@@ -215,8 +303,8 @@ LRESULT EndFindToolDrag(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	
 
 	fDragging = FALSE;
-	SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmapDrag1);
-	
+	SetFinderBitmap(hwnd, PROP_DRAG1_SCALED, hBitmapDrag1);
+
 	return 0;
 }
 
@@ -368,7 +456,7 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		fDragging = TRUE;
 
-		SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmapDrag2);
+		SetFinderBitmap(hwnd, PROP_DRAG2_SCALED, hBitmapDrag2);
 
 		hwndParent = GetParent(hwnd);
 		hwndCurrent = hwnd;
@@ -452,6 +540,13 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_NCDESTROY:
+	{
+		// Free this control's cached DPI-scaled bitmaps, if any
+		HBITMAP hbm1 = (HBITMAP)RemoveProp(hwnd, PROP_DRAG1_SCALED);
+		HBITMAP hbm2 = (HBITMAP)RemoveProp(hwnd, PROP_DRAG2_SCALED);
+
+		if(hbm1) DeleteObject(hbm1);
+		if(hbm2) DeleteObject(hbm2);
 
 		// When the last finder tool has been destroyed, free
 		// up all the resources
@@ -461,6 +556,7 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 
 		break;
+	}
 	}
 
 	return CallWindowProc(oldstaticproc, hwnd, msg, wParam, lParam);
@@ -492,8 +588,8 @@ BOOL MakeFinderTool(HWND hwnd, WNDFINDPROC wfp)
 	// Now apply them..
 	SetWindowLong(hwnd, GWL_STYLE, dwStyle);
 	
-	// Set the default bitmap
-	SendMessage(hwnd, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmapDrag1);
+	// Set the default bitmap, scaled for this control's monitor DPI
+	SetFinderBitmap(hwnd, PROP_DRAG1_SCALED, hBitmapDrag1);
 
 	// Set the callback for this control
 	SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)wfp);
