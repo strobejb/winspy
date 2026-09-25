@@ -535,10 +535,11 @@ UINT WinSpyDlg_Size(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		GetWindowRect(hwndPin, &rect2);
 		OffsetRect(&rect2, -rect2.left, -rect2.top);
 
-		// Position the pin toolbar
+		// Position the pin toolbar, with a little padding on the right
+		// so it isn't flush against the window edge.
 		//SetWindowPos(hwndPin,
 		//	HWND_TOP, rect.right-rect2.right, 1, rect2.right, rect2.bottom, 0);
-		MoveWindow(hwndPin, rect.right - rect2.right, 1, rect2.right, rect2.bottom, TRUE);
+		MoveWindow(hwndPin, rect.right - rect2.right - DpiScale(hwnd, 4), 1, rect2.right, rect2.bottom, TRUE);
 	}
 	
 	return 0;
@@ -671,10 +672,11 @@ UINT WinSpyDlg_WindowPosChanged(HWND hwnd, WINDOWPOS *wp)
 		{
 			HWND  hwndExpand = GetDlgItem(hwnd, IDC_EXPAND);
 			DWORD dwStyle = GetWindowLong(hwndExpand, GWL_STYLE);
+			int   size = DpiScale(hwndExpand, 16);
 
 			if(layout == WINSPY_NORMAL)
 			{
-				hIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON16), IMAGE_ICON, 16, 16, 0);
+				hIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON16), IMAGE_ICON, size, size, 0);
 				hOld = (HICON)SendDlgItemMessage(hwnd, IDC_EXPAND, BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIcon);
 
 				DestroyIcon(hOld);
@@ -684,7 +686,7 @@ UINT WinSpyDlg_WindowPosChanged(HWND hwnd, WINDOWPOS *wp)
 			}
 			else
 			{
-				hIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON18), IMAGE_ICON, 16, 16, 0);
+				hIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON18), IMAGE_ICON, size, size, 0);
 				hOld = (HICON)SendDlgItemMessage(hwnd, IDC_EXPAND, BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIcon);
 
 				DestroyIcon(hOld);

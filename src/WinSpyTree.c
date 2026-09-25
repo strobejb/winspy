@@ -19,6 +19,7 @@
 
 #include "resource.h"
 #include "WinSpy.h"
+#include "Utils.h"
 
 #pragma comment(lib, "comctl32.lib")
 
@@ -519,27 +520,60 @@ void FillGlobalWindowTree(HWND hwnd)
 //
 void InitGlobalWindowTree(HWND hwndTree)
 {
-	HBITMAP hBitmap;
+	HBITMAP hBitmap, hBitmapScaled;
 	TCITEM  tcitem;
 	HWND    hwndTab;
+	int     dpi, cxIcon, cyIcon;
 
 	//only need to create the image list once.
 	if(hImgList == 0)
 	{
+		dpi    = GetWindowDpi(hwndTree);
+		cxIcon = DpiScale(hwndTree, 16);
+		cyIcon = DpiScale(hwndTree, 16);
+
 		// Create an empty image list
-		hImgList = ImageList_Create(16,16,ILC_COLOR32 /*ILC_COLORDDB*/|ILC_MASK,NUM_CLASS_BITMAPS,8);
-	
-		// Load our bitmap and add it to the image list
+		hImgList = ImageList_Create(cxIcon,cyIcon,ILC_COLOR32 /*ILC_COLORDDB*/|ILC_MASK,NUM_CLASS_BITMAPS,8);
+
+		// Load our bitmap and add it to the image list. COLORONCOLOR (not
+		// HALFTONE) keeps the magenta mask colour solid at the edges when
+		// scaling for DPI - HALFTONE would blend it into the icon.
 		hBitmap = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_WINDOW_VISIBLE));
-		ImageList_AddMasked(hImgList,hBitmap,RGB(255,0,255));
+		hBitmapScaled = CreateDpiScaledBitmap(hBitmap, dpi, COLORONCOLOR);
+		ImageList_AddMasked(hImgList,hBitmapScaled,RGB(255,0,255));
+		if(hBitmapScaled != hBitmap) DeleteObject(hBitmapScaled);
 		DeleteObject(hBitmap);
 
 		hBitmap = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_WINDOW_INVISIBLE));
-		ImageList_AddMasked(hImgList,hBitmap,RGB(255,0,255));
+		hBitmapScaled = CreateDpiScaledBitmap(hBitmap, dpi, COLORONCOLOR);
+		ImageList_AddMasked(hImgList,hBitmapScaled,RGB(255,0,255));
+		if(hBitmapScaled != hBitmap) DeleteObject(hBitmapScaled);
 		DeleteObject(hBitmap);
-	
+
 		// Assign the image list to the treeview control
 		TreeView_SetImageList(hwndTree, hImgList, TVSIL_NORMAL);
+
+		// Add some extra row spacing beyond the bare minimum of
+		// max(icon, font) - same proportional-padding approach as
+		// FunkyList.c's owner-drawn lists. IDC_TREE1 doesn't have
+		// TVS_NONEVENHEIGHT, so the value must come out even.
+		{
+			HFONT      hFont = (HFONT)SendMessage(hwndTree, WM_GETFONT, 0, 0);
+			HDC        hdcTree = GetDC(hwndTree);
+			HFONT      hOldFont;
+			TEXTMETRIC tm;
+			int        itemHeight;
+
+			hOldFont = hFont ? (HFONT)SelectObject(hdcTree, hFont) : NULL;
+			GetTextMetrics(hdcTree, &tm);
+			if(hOldFont) SelectObject(hdcTree, hOldFont);
+			ReleaseDC(hwndTree, hdcTree);
+
+			itemHeight = max(cyIcon, tm.tmHeight) + tm.tmHeight / 2;
+			itemHeight &= ~1;
+
+			TreeView_SetItemHeight(hwndTree, itemHeight);
+		}
 	}
 
 	//add an item to the tab control
