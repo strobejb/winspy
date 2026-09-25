@@ -26,6 +26,10 @@ TCHAR *GetVersionString(TCHAR *szFileName, TCHAR *szValue, TCHAR *szBuffer, ULON
 BOOL ProcessArchMatches(HWND hwnd);
 WORD GetProcessorArchitecture();
 
+int     GetWindowDpi(HWND hwnd);
+int     DpiScale(HWND hwnd, int value);
+HBITMAP CreateDpiScaledBitmap(HBITMAP hbmSrc, int dpi, int stretchMode);
+
 #ifdef __cplusplus
 }
 #endif

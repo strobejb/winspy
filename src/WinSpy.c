@@ -416,27 +416,76 @@ HWND CreateTooltip(HWND hwndDlg)
 //
 HWND CreatePinToolbar(HWND hwndDlg)
 {
-	RECT    rect;
-	HWND	hwndTB;
-	
-	// Create the toolbar to hold pin bitmap
+	RECT       rect;
+	HWND       hwndTB;
+	HBITMAP    hBitmap, hBitmapScaled;
+	HIMAGELIST hImageList;
+	HDC        hdcScreen, hdcBmp;
+	COLORREF   crMask;
+	BITMAP     bmScaled;
+	int        dpi, cx, cy;
+
+	dpi = GetWindowDpi(hwndDlg);
+
+	hBitmap = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_PIN_BITMAP));
+
+	// Classic toolbar bitmaps use their bottom-left pixel as the
+	// transparency-mask colour - sample it rather than guess it.
+	hdcScreen = GetDC(0);
+	hdcBmp    = CreateCompatibleDC(hdcScreen);
+	SelectObject(hdcBmp, hBitmap);
+	crMask = GetPixel(hdcBmp, 0, 13);
+	DeleteDC(hdcBmp);
+	ReleaseDC(0, hdcScreen);
+
+	// Scale the bitmap for the current dpi. COLORONCOLOR (not HALFTONE)
+	// keeps that mask colour solid at the edges - HALFTONE would blend
+	// it into the icon and corrupt the transparency.
+	hBitmapScaled = CreateDpiScaledBitmap(hBitmap, dpi, COLORONCOLOR);
+
+	// The bitmap is a horizontal strip of 2 frames (unpinned/pinned).
+	// Derive the per-frame size from the actual scaled bitmap, rather
+	// than scaling 15x14 independently, so it always divides evenly -
+	// two separately-rounded MulDiv results aren't guaranteed to.
+	GetObject(hBitmapScaled, sizeof(bmScaled), &bmScaled);
+	cx = bmScaled.bmWidth / 2;
+	cy = bmScaled.bmHeight;
+
+	hImageList = ImageList_Create(cx, cy, ILC_COLOR32 | ILC_MASK, 2, 0);
+	ImageList_AddMasked(hImageList, hBitmapScaled, crMask);
+
+	if(hBitmapScaled != hBitmap) DeleteObject(hBitmapScaled);
+	DeleteObject(hBitmap);
+
+	// Create the toolbar with no buttons yet and no built-in bitmap -
+	// TB_SETBUTTONSIZE only takes effect before any buttons are added,
+	// so the button (tbbPin) is added afterwards via TB_ADDBUTTONS.
 	hwndTB = CreateToolbarEx(
-			hwndDlg,	
+			hwndDlg,
 			TOOLBAR_PIN_STYLES,				//,
 			IDC_PIN_TOOLBAR,				//toolbar ID (don't need)
-			2,								//number of button images
-			hInst,							//where the bitmap is
-			IDB_PIN_BITMAP,					//bitmap resource name
-			tbbPin,							//TBBUTTON structure
-			sizeof(tbbPin) / sizeof(tbbPin[0]),
-			15,14,15,14,					//0,0,//16,18, 16, 18,
+			0,								//no built-in bitmap load
+			NULL,
+			0,
+			NULL,							//no buttons yet
+			0,
+			cx,cy,cx,cy,
 			sizeof(TBBUTTON) );
 
+	SendMessage(hwndTB, TB_SETIMAGELIST, 0, (LPARAM)hImageList);
+
+	// TOOLBAR_PIN_STYLES includes CCS_NORESIZE, which per the documented
+	// pattern means the toolbar won't infer button size from the image
+	// list on its own - it must be set explicitly.
+	SendMessage(hwndTB, TB_SETBITMAPSIZE, 0, MAKELPARAM(cx, cy));
+	SendMessage(hwndTB, TB_SETBUTTONSIZE, 0, MAKELPARAM(cx, cy));
+
+	SendMessage(hwndTB, TB_ADDBUTTONS, sizeof(tbbPin) / sizeof(tbbPin[0]), (LPARAM)tbbPin);
 
 	// Find out how big the button is, so we can resize the
 	// toolbar to fit perfectly
 	SendMessage(hwndTB, TB_GETITEMRECT, 0, (LPARAM)&rect);
-	
+
 	SetWindowPos(hwndTB, HWND_TOP, 0,0, 
 		rect.right-rect.left, 
 		rect.bottom-rect.top, SWP_NOMOVE);
@@ -702,7 +751,10 @@ BOOL WinSpyDlg_SysColorChange(HWND hwnd)
 	// Set the treeview colours
 	TreeView_SetBkColor(GetDlgItem(hwnd, IDC_TREE1), GetSysColor(COLOR_WINDOW));
 
-	// Recreate toolbar, so it uses new colour scheme
+	// Recreate toolbar, so it uses new colour scheme. TB_SETIMAGELIST
+	// doesn't hand ownership of the image list to the toolbar, so it's
+	// ours to destroy before the window that was using it goes away.
+	ImageList_Destroy((HIMAGELIST)SendMessage(hwndPin, TB_GETIMAGELIST, 0, 0));
 	DestroyWindow(hwndPin);
 
 	hwndPin = CreatePinToolbar(hwnd);

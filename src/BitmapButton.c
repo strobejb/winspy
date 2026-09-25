@@ -27,6 +27,7 @@
 #include <uxtheme.h>
 #include <vssym32.h> //<tmschema.h>
 #include "BitmapButton.h"
+#include "Utils.h"
 
 #pragma comment(lib,    "Uxtheme.lib")
 #pragma comment(lib,    "Delayimp.lib")
@@ -199,9 +200,12 @@ BOOL DrawBitmapButton(DRAWITEMSTRUCT *dis)
 		// Retrieve button icon
 		hIcon = (HICON)SendMessage(dis->hwndItem, BM_GETIMAGE, IMAGE_ICON, 0);
 
-		// Find icon dimensions
-		sxIcon = 16;
-		syIcon = 16;
+		// Find icon dimensions - must match the size MakeBitmapButton()
+		// actually loaded the icon at (DpiScale(hwnd, 16)), since
+		// DrawIconEx below will stretch/shrink the icon to whatever
+		// size is passed here regardless of its real pixel dimensions.
+		sxIcon = DpiScale(dis->hwndItem, 16);
+		syIcon = sxIcon;
 
 		CopyRect(&rect, &dis->rcItem);
 		GetCursorPos(&pt);
@@ -340,9 +344,10 @@ void MakeBitmapButton(HWND hwnd, UINT uIconId)
 {
 	WNDPROC oldproc;
 	DWORD   dwStyle;
+	int     size = DpiScale(hwnd, 16);
 
 	HICON hIcon = (HICON)LoadImage(GetModuleHandle(0),
-		MAKEINTRESOURCE(uIconId), IMAGE_ICON, 16, 16, 0);
+		MAKEINTRESOURCE(uIconId), IMAGE_ICON, size, size, 0);
 
 	// Add on BS_ICON and BS_OWNERDRAW styles
 	dwStyle = GetWindowLong(hwnd, GWL_STYLE);

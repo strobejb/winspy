@@ -10,6 +10,11 @@
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 
+// Needed for GetDpiForWindow() (Windows 10 1607+)
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
+
 #include <windows.h>
 #include <tchar.h>
 #include <malloc.h>
@@ -333,4 +338,75 @@ WORD GetProcessorArchitecture()
 
 	return wProcessorArchitecture;
 #endif // _WIN64
+}
+
+//
+// DPI of the monitor hwnd currently lives on.
+//
+int GetWindowDpi(HWND hwnd)
+{
+	return GetDpiForWindow(hwnd);
+}
+
+//
+// Scale a 96-dpi pixel value for hwnd's current monitor.
+//
+int DpiScale(HWND hwnd, int value)
+{
+	return MulDiv(value, GetWindowDpi(hwnd), USER_DEFAULT_SCREEN_DPI);
+}
+
+//
+// Return a copy of hbmSrc scaled from 96 dpi up to the given dpi, using
+// stretchMode (e.g. HALFTONE for plain bitmaps, COLORONCOLOR for bitmaps
+// that will be used with a transparency mask - HALFTONE can blend mask-
+// colored pixels into neighbouring ones at the edges, corrupting the mask).
+// Returns hbmSrc itself (not a copy) when no scaling is needed - the
+// caller should only free the result if it's different from hbmSrc.
+//
+HBITMAP CreateDpiScaledBitmap(HBITMAP hbmSrc, int dpi, int stretchMode)
+{
+	BITMAP bm;
+	HDC hdcScreen, hdcSrc, hdcDst;
+	HBITMAP hbmDst, hbmOldSrc, hbmOldDst;
+	int cxNew, cyNew;
+
+	if(dpi <= USER_DEFAULT_SCREEN_DPI || hbmSrc == NULL)
+		return hbmSrc;
+
+	if(!GetObject(hbmSrc, sizeof(bm), &bm))
+		return hbmSrc;
+
+	cxNew = MulDiv(bm.bmWidth,  dpi, USER_DEFAULT_SCREEN_DPI);
+	cyNew = MulDiv(bm.bmHeight, dpi, USER_DEFAULT_SCREEN_DPI);
+
+	hdcScreen = GetDC(0);
+	hdcSrc    = CreateCompatibleDC(hdcScreen);
+	hdcDst    = CreateCompatibleDC(hdcScreen);
+	hbmDst    = CreateCompatibleBitmap(hdcScreen, cxNew, cyNew);
+
+	if(hdcSrc == NULL || hdcDst == NULL || hbmDst == NULL)
+	{
+		if(hbmDst) DeleteObject(hbmDst);
+		if(hdcSrc) DeleteDC(hdcSrc);
+		if(hdcDst) DeleteDC(hdcDst);
+		ReleaseDC(0, hdcScreen);
+		return hbmSrc;
+	}
+
+	hbmOldSrc = SelectObject(hdcSrc, hbmSrc);
+	hbmOldDst = SelectObject(hdcDst, hbmDst);
+
+	SetStretchBltMode(hdcDst, stretchMode);
+	SetBrushOrgEx(hdcDst, 0, 0, NULL);
+	StretchBlt(hdcDst, 0, 0, cxNew, cyNew, hdcSrc, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+
+	SelectObject(hdcSrc, hbmOldSrc);
+	SelectObject(hdcDst, hbmOldDst);
+
+	DeleteDC(hdcSrc);
+	DeleteDC(hdcDst);
+	ReleaseDC(0, hdcScreen);
+
+	return hbmDst;
 }

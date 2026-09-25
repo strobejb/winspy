@@ -47,17 +47,11 @@
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 
-// Needed for GetDpiForWindow() (issue #11: the finder-tool bitmaps are
-// fixed-size resources that no longer get scaled up by DWM now that the
-// app is per-monitor DPI aware, so we scale them ourselves)
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0A00
-#endif
-
 #include <windows.h>
 #include "FindTool.h"
 #include "resource.h"
 #include "WinSpy.h"
+#include "Utils.h"
 
 #define INVERT_BORDER 3
 
@@ -189,62 +183,10 @@ void LoadFinderResources()
 }
 
 //
-// Return a copy of hbmSrc scaled from 96 dpi up to the given dpi.
-// A SS_BITMAP static control auto-sizes itself to whatever bitmap it's
-// given, so scaling the bitmap is enough to make the control the right
-// size too. Returns hbmSrc itself (not a copy) when no scaling is needed.
-//
-static HBITMAP CreateDpiScaledBitmap(HBITMAP hbmSrc, int dpi)
-{
-	BITMAP bm;
-	HDC hdcScreen, hdcSrc, hdcDst;
-	HBITMAP hbmDst, hbmOldSrc, hbmOldDst;
-	int cxNew, cyNew;
-
-	if(dpi <= USER_DEFAULT_SCREEN_DPI || hbmSrc == NULL)
-		return hbmSrc;
-
-	if(!GetObject(hbmSrc, sizeof(bm), &bm))
-		return hbmSrc;
-
-	cxNew = MulDiv(bm.bmWidth,  dpi, USER_DEFAULT_SCREEN_DPI);
-	cyNew = MulDiv(bm.bmHeight, dpi, USER_DEFAULT_SCREEN_DPI);
-
-	hdcScreen = GetDC(0);
-	hdcSrc    = CreateCompatibleDC(hdcScreen);
-	hdcDst    = CreateCompatibleDC(hdcScreen);
-	hbmDst    = CreateCompatibleBitmap(hdcScreen, cxNew, cyNew);
-
-	if(hdcSrc == NULL || hdcDst == NULL || hbmDst == NULL)
-	{
-		if(hbmDst) DeleteObject(hbmDst);
-		if(hdcSrc) DeleteDC(hdcSrc);
-		if(hdcDst) DeleteDC(hdcDst);
-		ReleaseDC(0, hdcScreen);
-		return hbmSrc;
-	}
-
-	hbmOldSrc = SelectObject(hdcSrc, hbmSrc);
-	hbmOldDst = SelectObject(hdcDst, hbmDst);
-
-	SetStretchBltMode(hdcDst, HALFTONE);
-	SetBrushOrgEx(hdcDst, 0, 0, NULL);
-	StretchBlt(hdcDst, 0, 0, cxNew, cyNew, hdcSrc, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
-
-	SelectObject(hdcSrc, hbmOldSrc);
-	SelectObject(hdcDst, hbmOldDst);
-
-	DeleteDC(hdcSrc);
-	DeleteDC(hdcDst);
-	ReleaseDC(0, hdcScreen);
-
-	return hbmDst;
-}
-
-//
 // Set the finder-tool bitmap on a control, scaling it for the control's
-// current monitor DPI first and caching the scaled copy as a window
-// property so it isn't recreated on every drag/drop.
+// current monitor DPI first (CreateDpiScaledBitmap, in Utils.c) and
+// caching the scaled copy as a window property so it isn't recreated on
+// every drag/drop.
 //
 static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP hbmSrc)
 {
@@ -252,7 +194,7 @@ static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP hbmSrc)
 
 	if(hbmScaled == NULL)
 	{
-		hbmScaled = CreateDpiScaledBitmap(hbmSrc, GetDpiForWindow(hwnd));
+		hbmScaled = CreateDpiScaledBitmap(hbmSrc, GetWindowDpi(hwnd), HALFTONE);
 
 		// Only cache (and later free) a genuinely new bitmap - if no
 		// scaling was needed, CreateDpiScaledBitmap hands back hbmSrc
