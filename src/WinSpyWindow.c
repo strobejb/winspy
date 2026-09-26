@@ -127,26 +127,41 @@ void GetPinnedPosition(HWND hwnd, POINT *pt)
 {
 	RECT rect;
 	RECT rcDisplay;
-	
-	// 
+	int  centreX, centreY, midX, midY;
+
+	//
 	GetWindowRect(hwnd, &rect);
 
-	// get 
+	// get
 //	SystemParametersInfo(SPI_GETWORKAREA, 0, &rcDisplay, FALSE);
 	GetWorkArea(&rect, &rcDisplay);
 
 	uPinnedCorner = PINNED_NONE;
 
-	if(rect.left + szLastExp.cx >= rcDisplay.right)
+	// Which side the window trends towards is based on which half of the
+	// work area its centre currently sits in - deliberately independent
+	// of its current size (minimized/normal/expanded), so moving the
+	// window in ANY of those states updates the pinned corner the same
+	// way. The previous check (rect.left + szLastExp.cx >= rcDisplay.right)
+	// compared against the *expanded* width regardless of current size,
+	// which made the "close enough" margin huge while minimized (easy to
+	// trigger) but required being flush against the true edge while
+	// normal/expanded (effectively never triggered).
+	centreX = (rect.left + rect.right) / 2;
+	centreY = (rect.top + rect.bottom) / 2;
+	midX    = (rcDisplay.left + rcDisplay.right) / 2;
+	midY    = (rcDisplay.top + rcDisplay.bottom) / 2;
+
+	if(centreX >= midX)
 		uPinnedCorner |= PINNED_RIGHT;
 	else
 		uPinnedCorner |= PINNED_LEFT;
 
-	if(rect.top + szLastExp.cy >= rcDisplay.bottom)
+	if(centreY >= midY)
 		uPinnedCorner |= PINNED_BOTTOM;
 	else
 		uPinnedCorner |= PINNED_TOP;
-	
+
 	if(fPinWindow == FALSE)
 		uPinnedCorner = PINNED_TOPLEFT;
 

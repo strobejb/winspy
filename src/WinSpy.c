@@ -522,7 +522,12 @@ BOOL WinSpy_InitDlg(HWND hwnd)
 	
 	hwndSizer   = CreateSizeGrip(hwnd);
 	hwndPin     = CreatePinToolbar(hwnd);
-	
+
+	// Pin toolbar button is temporarily hidden from the UI - the app
+	// always behaves as if pinned (see Options.c's fPinWindow override).
+	// The toolbar itself is left fully intact so this is easy to revert.
+	ShowWindow(hwndPin, SW_HIDE);
+
 	// Load image lists etc
 	InitGlobalWindowTree(GetDlgItem(hwnd, IDC_TREE1));
 	
@@ -761,6 +766,7 @@ BOOL WinSpyDlg_SysColorChange(HWND hwnd)
 	DestroyWindow(hwndPin);
 
 	hwndPin = CreatePinToolbar(hwnd);
+	ShowWindow(hwndPin, SW_HIDE);
 
 	// Send a WM_SIZE so that the pin toolbar gets repositioned
 	SetWindowPos(hwnd, 0, 0, 0, 0, 0, 

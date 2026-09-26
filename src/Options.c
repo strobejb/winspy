@@ -92,6 +92,12 @@ void LoadSettings(void)
 	fShowDimmed     = GetPrivateProfileInt(INI_SECTION, _T("ShowDimmed"),     TRUE,  szIniPath) != 0;
 	fClassThenText  = GetPrivateProfileInt(INI_SECTION, _T("ClassThenText"),  TRUE,  szIniPath) != 0;
 	fPinWindow      = GetPrivateProfileInt(INI_SECTION, _T("PinWindow"),      FALSE, szIniPath) != 0;
+
+	// The pin toolbar button is temporarily hidden from the UI (see
+	// WinSpy_InitDlg) - force the pinned behaviour on regardless of any
+	// previously saved preference. Remove this override (and unhide the
+	// toolbar) to restore the toggle.
+	fPinWindow = TRUE;
 	fShowInCaption  = GetPrivateProfileInt(INI_SECTION, _T("ShowInCaption"),  TRUE,  szIniPath) != 0;
 	fEnableToolTips = GetPrivateProfileInt(INI_SECTION, _T("EnableToolTips"), FALSE, szIniPath) != 0;
 	uTreeInclude    = GetPrivateProfileInt(INI_SECTION, _T("TreeItems"), WINLIST_INCLUDE_ALL, szIniPath);
