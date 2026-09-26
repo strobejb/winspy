@@ -238,6 +238,7 @@
     <None Include="resource\icon4.ico" />
     <None Include="resource\icon5.ico" />
     <None Include="resource\icon6.ico" />
+    <None Include="resource\icon7.ico" />
     <None Include="resource\rt_manif.bin" />
     <None Include="resource\selbox.png" />
     <None Include="resource\selbox2.png" />

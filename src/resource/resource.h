@@ -49,6 +49,7 @@
 #define IDB_DRAGTOOL2_200               168
 #define IDB_DRAGTOOL2_225               173
 #define IDB_DRAGTOOL2_250               174
+#define IDI_ICON_SYSMENU                175
 #define IDC_LIST1                       1000
 #define IDC_DRAGGER                     1001
 #define IDC_LIST2                       1001
@@ -189,7 +190,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        175
+#define _APS_NEXT_RESOURCE_VALUE        176
 #define _APS_NEXT_COMMAND_VALUE         40044
 #define _APS_NEXT_CONTROL_VALUE         1071
 #define _APS_NEXT_SYMED_VALUE           101
