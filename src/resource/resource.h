@@ -3,7 +3,6 @@
 // Used by WinSpy.rc
 //
 #define IDD_TAB_GENERAL                 101
-#define IDB_DRAGTOOL1                   103
 #define IDC_CURSOR1                     104
 #define IDI_ICON1                       105
 #define IDD_TAB_STYLES                  106
@@ -14,7 +13,6 @@
 #define IDD_MAIN                        111
 #define IDB_BITMAP2                     113
 #define IDB_WINDOW_INVISIBLE            113
-#define IDB_DRAGTOOL2                   116
 #define IDB_BITMAP3                     117
 #define IDB_WINDOW_VISIBLE              117
 #define IDD_STYLE_EDIT                  118
@@ -37,12 +35,14 @@
 #define IDR_RT_MANIFEST1                159
 #define IDB_PNG1                        162
 #define IDB_SELBOX                      162
+#define IDB_DRAGTOOL1_100               103
 #define IDB_DRAGTOOL1_125               163
 #define IDB_DRAGTOOL1_150               164
 #define IDB_DRAGTOOL1_175               169
 #define IDB_DRAGTOOL1_200               165
 #define IDB_DRAGTOOL1_225               170
 #define IDB_DRAGTOOL1_250               171
+#define IDB_DRAGTOOL2_100               116
 #define IDB_DRAGTOOL2_125               166
 #define IDB_DRAGTOOL2_150               167
 #define IDB_DRAGTOOL2_175               172
