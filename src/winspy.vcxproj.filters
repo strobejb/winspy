@@ -187,6 +187,42 @@
     <None Include="resource\finder2.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resource\finder1_125.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder1_150.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder1_175.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder1_200.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder1_225.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder1_250.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder2_125.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder2_150.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder2_175.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder2_200.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder2_225.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\finder2_250.png">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="resource\winspy.exe.manifest">

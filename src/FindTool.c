@@ -85,9 +85,23 @@ static HHOOK   draghook = 0;
 static HWND    draghookhwnd = 0;
 
 //
-//	Handle to the two dragger bitmaps
+// The finder-tool bitmaps are baked at all 7 standard Windows scaling
+// presets (100/125/150/175/200/225/250% of the 96dpi base) - almost every
+// real monitor's DPI is set to one of these, so PickAndScaleFinderVariant
+// below finds an exact match and no runtime GDI stretch is needed at all.
+// Only a genuinely custom/non-standard DPI falls back to scaling from the
+// nearest baked size.
 //
-static HBITMAP hBitmapDrag1, hBitmapDrag2;
+#define NUM_FINDER_VARIANTS 7
+
+static const int  g_finderVariantScales[NUM_FINDER_VARIANTS] = { 100, 125, 150, 175, 200, 225, 250 };
+static const UINT g_finderVariantIds1[NUM_FINDER_VARIANTS] =
+	{ IDB_DRAGTOOL1, IDB_DRAGTOOL1_125, IDB_DRAGTOOL1_150, IDB_DRAGTOOL1_175, IDB_DRAGTOOL1_200, IDB_DRAGTOOL1_225, IDB_DRAGTOOL1_250 };
+static const UINT g_finderVariantIds2[NUM_FINDER_VARIANTS] =
+	{ IDB_DRAGTOOL2, IDB_DRAGTOOL2_125, IDB_DRAGTOOL2_150, IDB_DRAGTOOL2_175, IDB_DRAGTOOL2_200, IDB_DRAGTOOL2_225, IDB_DRAGTOOL2_250 };
+
+static HBITMAP hBitmapDrag1[NUM_FINDER_VARIANTS];
+static HBITMAP hBitmapDrag2[NUM_FINDER_VARIANTS];
 static HCURSOR hCursor;
 
 //is the finder-tool being dragged??
@@ -190,10 +204,14 @@ static BOOL fThemeApiAvailable;
 
 void LoadFinderResources()
 {
+	int i;
 	void *pvBits;
 
-	hBitmapDrag1 = LoadPNGImage(IDB_DRAGTOOL1, &pvBits);
-	hBitmapDrag2 = LoadPNGImage(IDB_DRAGTOOL2, &pvBits);
+	for(i = 0; i < NUM_FINDER_VARIANTS; i++)
+	{
+		hBitmapDrag1[i] = LoadPNGImage(g_finderVariantIds1[i], &pvBits);
+		hBitmapDrag2[i] = LoadPNGImage(g_finderVariantIds2[i], &pvBits);
+	}
 
 	hCursor = LoadCursor(GetModuleHandle(0), MAKEINTRESOURCE(IDC_CURSOR1));
 
@@ -201,24 +219,61 @@ void LoadFinderResources()
 }
 
 //
-// Set the finder-tool bitmap on a control, scaling it for the control's
-// current monitor DPI first (CreateDpiScaledAlphaBitmap, in Utils.c) and
-// caching the scaled copy as a window property so it isn't recreated on
-// every drag/drop. The control paints itself (see StaticProc's WM_PAINT) -
-// this just records which bitmap is now current and invalidates it.
+// Pick the baked-in size variant whose nominal scale is closest to the
+// control's actual DPI, then finish the job with a (usually small) GDI
+// resize (CreateDpiScaledAlphaBitmap, in Utils.c) - much crisper than
+// always stretching from the 100% master. *pfOwned reports whether the
+// result is a fresh bitmap the caller must free, as opposed to one of
+// the permanent baked bitmaps in the variants[] array.
 //
-static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP hbmSrc)
+static HBITMAP PickAndScaleFinderVariant(HBITMAP *variants, int dpi, BOOL *pfOwned)
+{
+	int targetScale = MulDiv(dpi, 100, USER_DEFAULT_SCREEN_DPI);
+	int i, best = 0, bestDelta = targetScale - g_finderVariantScales[0];
+	HBITMAP hbmBase, hbmScaled;
+
+	if(bestDelta < 0) bestDelta = -bestDelta;
+
+	for(i = 1; i < NUM_FINDER_VARIANTS; i++)
+	{
+		int delta = targetScale - g_finderVariantScales[i];
+		if(delta < 0) delta = -delta;
+
+		if(delta < bestDelta)
+		{
+			bestDelta = delta;
+			best = i;
+		}
+	}
+
+	hbmBase   = variants[best];
+	hbmScaled = CreateDpiScaledAlphaBitmap(hbmBase, MulDiv(dpi, 100, g_finderVariantScales[best]));
+
+	*pfOwned = (hbmScaled != hbmBase);
+	return hbmScaled;
+}
+
+//
+// Set the finder-tool bitmap on a control, picking and scaling the best
+// variant for the control's current monitor DPI, and caching the result
+// as a window property so it isn't recreated on every drag/drop. The
+// control paints itself (see StaticProc's WM_PAINT) - this just records
+// which bitmap is now current and invalidates it.
+//
+static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP *variants)
 {
 	HBITMAP hbmScaled = (HBITMAP)GetProp(hwnd, propName);
 
 	if(hbmScaled == NULL)
 	{
-		hbmScaled = CreateDpiScaledAlphaBitmap(hbmSrc, GetWindowDpi(hwnd));
+		BOOL fOwned;
 
-		// Only cache (and later free) a genuinely new bitmap - if no
-		// scaling was needed, CreateDpiScaledAlphaBitmap hands back hbmSrc
-		// itself, which is owned by LoadFinderResources/FreeFinderResources.
-		if(hbmScaled != hbmSrc)
+		hbmScaled = PickAndScaleFinderVariant(variants, GetWindowDpi(hwnd), &fOwned);
+
+		// Only cache (and later free) a genuinely new bitmap - a scaled
+		// copy the caller must own, as opposed to one of the permanent
+		// baked bitmaps owned by LoadFinderResources/FreeFinderResources.
+		if(fOwned)
 			SetProp(hwnd, propName, (HANDLE)hbmScaled);
 	}
 
@@ -228,8 +283,13 @@ static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP hbmSrc)
 
 void FreeFinderResources()
 {
-	DeleteObject(hBitmapDrag1);
-	DeleteObject(hBitmapDrag2);
+	int i;
+
+	for(i = 0; i < NUM_FINDER_VARIANTS; i++)
+	{
+		DeleteObject(hBitmapDrag1[i]);
+		DeleteObject(hBitmapDrag2[i]);
+	}
 
 	DestroyCursor(hCursor);
 }

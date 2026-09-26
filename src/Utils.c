@@ -417,6 +417,11 @@ HBITMAP CreateDpiScaledBitmap(HBITMAP hbmSrc, int dpi, int stretchMode)
 // real 32bpp DIB section - a screen-compatible bitmap doesn't reliably
 // preserve the alpha channel's meaning through StretchBlt/AlphaBlend.
 //
+// Unlike CreateDpiScaledBitmap, this also scales DOWN (dpi < 96) - callers
+// use that to fine-scale from whichever pre-baked size is the closest
+// match for the real DPI (see FindTool.c's g_finderVariants), which may
+// be slightly bigger than what's actually needed.
+//
 HBITMAP CreateDpiScaledAlphaBitmap(HBITMAP hbmSrc, int dpi)
 {
 	BITMAP bm;
@@ -426,7 +431,7 @@ HBITMAP CreateDpiScaledAlphaBitmap(HBITMAP hbmSrc, int dpi)
 	void *pvBits;
 	int cxNew, cyNew;
 
-	if(dpi <= USER_DEFAULT_SCREEN_DPI || hbmSrc == NULL)
+	if(dpi == USER_DEFAULT_SCREEN_DPI || hbmSrc == NULL)
 		return hbmSrc;
 
 	if(!GetObject(hbmSrc, sizeof(bm), &bm))
