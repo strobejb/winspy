@@ -181,10 +181,10 @@
     <None Include="selbox.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="resource\finder1.png">
+    <None Include="resource\finder1_100.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="resource\finder2.png">
+    <None Include="resource\finder2_100.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resource\finder1_125.png">

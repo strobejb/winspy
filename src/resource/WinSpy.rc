@@ -538,8 +538,8 @@ IDB_SELBOX              PNG                     "selbox.png"
 // (100/125/150/175/200/225/250% of the 96dpi base) so almost every real
 // monitor's DPI gets an exact baked size with no runtime GDI stretch -
 // see FindTool.c's g_finderVariants.
-IDB_DRAGTOOL1           PNG                     "finder1.png"
-IDB_DRAGTOOL2           PNG                     "finder2.png"
+IDB_DRAGTOOL1_100       PNG                     "finder1_100.png"
+IDB_DRAGTOOL2_100       PNG                     "finder2_100.png"
 IDB_DRAGTOOL1_125       PNG                     "finder1_125.png"
 IDB_DRAGTOOL1_150       PNG                     "finder1_150.png"
 IDB_DRAGTOOL1_175       PNG                     "finder1_175.png"
