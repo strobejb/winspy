@@ -621,8 +621,11 @@ BOOL WinSpy_InitDlg(HWND hwnd)
 	hBmp2 = LoadBitmap(hInst, MAKEINTRESOURCE(IDB_CHECK2));
 	SetMenuItemBitmaps(hSysMenu, SC_MAXIMIZE, MF_BYCOMMAND, hBmp1, hBmp2);
 		
-	// Set the dialog's Small Icon
-	hIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 16, 16, 0);
+	// Set the dialog's Small Icon - this is what actually renders in the
+	// titlebar corner / system menu button, independently of the taskbar
+	// and Alt-Tab icon (ICON_BIG, below) - a hamburger reads better than
+	// the app icon at this size and in this "click for a menu" role.
+	hIcon = LoadImage(hInst, MAKEINTRESOURCE(IDI_ICON_SYSMENU), IMAGE_ICON, 16, 16, 0);
 	SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 
 	// Set the dialog's Large Icon

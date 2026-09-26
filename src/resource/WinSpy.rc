@@ -441,6 +441,7 @@ IDI_ICON10              ICON                    "icon3.ico"
 IDI_ICON17              ICON                    "icon4.ico"
 IDI_ICON16              ICON                    "icon5.ico"
 IDI_ICON18              ICON                    "icon6.ico"
+IDI_ICON_SYSMENU        ICON                    "icon7.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

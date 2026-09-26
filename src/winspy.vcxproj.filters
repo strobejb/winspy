@@ -169,6 +169,9 @@
     <None Include="resource\icon6.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resource\icon7.ico">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="resource\selbox.png">
       <Filter>Resource Files</Filter>
     </None>
