@@ -574,7 +574,7 @@ BOOL WinSpy_InitDlg(HWND hwnd)
 	if(fSaveWinPos && ptPinPos.x != CW_USEDEFAULT && ptPinPos.y != CW_USEDEFAULT)
 	{
 		SetWindowLayout(hwnd, WINSPY_MINIMIZED);
-	}	
+	}
 	else
 	{
 		RECT rect;
@@ -944,6 +944,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 void ExitWinSpy(HWND hwnd, UINT uCode)
 {
+	// Refresh the pinned-corner anchor from the window's actual final
+	// state before it's destroyed (NOT after the message loop ends - by
+	// then hwnd is already gone, and GetWindowRect on a destroyed handle
+	// fails silently, leaving garbage that gets saved as the position).
+	// During the session ptPinPos is only updated when a caption-drag
+	// ends with the mouse still over the caption/client area (uHitTest
+	// == HTCAPTION at that exact instant) - if the last drag's release
+	// happened to land somewhere that didn't register as HTCAPTION, that
+	// update gets silently skipped and a stale anchor from earlier would
+	// get saved instead. This guarantees what's persisted always matches
+	// reality, regardless of that.
+	GetPinnedPosition(hwnd, &ptPinPos);
+
 	DestroyWindow(hwnd);
 	PostQuitMessage(uCode);
 }

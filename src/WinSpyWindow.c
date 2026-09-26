@@ -98,29 +98,36 @@ void GetWorkArea(RECT *prcWinRect, RECT *prcWorkArea)
 	}
 }
 
+//
+// Make sure hwnd is fully within the work area of whichever monitor it's
+// nearest to - handles both a window that's partially off-screen (e.g.
+// the monitor's resolution shrank since last run) and one that's
+// entirely off-screen (e.g. a monitor was unplugged and its old
+// coordinates no longer land on any display). Never resizes the window,
+// only slides it back into view.
+//
+// GetWorkArea uses MONITOR_DEFAULTTONEAREST, so it always resolves to a
+// real monitor's work area even when the window's saved position isn't
+// on any current display - no separate "is it visible at all" check or
+// fallback is needed.
+//
 void ForceVisibleDisplay(HWND hwnd)
 {
-	RECT		rect;
-	HMODULE		hUser32;
+	RECT rect, rcWork;
+	int  width, height;
 
 	GetWindowRect(hwnd, &rect);
+	width  = rect.right  - rect.left;
+	height = rect.bottom - rect.top;
 
-	if ((hUser32 = GetModuleHandle(_T("USER32.DLL"))) == 0)
-		return;
-	
-	pMonitorFromRect = (MFR_PROC)GetProcAddress(hUser32, "MonitorFromRect");
+	GetWorkArea(&rect, &rcWork);
 
-	if(pMonitorFromRect != 0)
-	{
-		if(NULL == pMonitorFromRect(&rect, MONITOR_DEFAULTTONULL))
-		{
-			// force window onto primary display if it is not visible
-			rect.left %= GetSystemMetrics(SM_CXSCREEN);
-			rect.top  %= GetSystemMetrics(SM_CYSCREEN);
+	if(rect.right  > rcWork.right)  rect.left = rcWork.right  - width;
+	if(rect.bottom > rcWork.bottom) rect.top  = rcWork.bottom - height;
+	if(rect.left   < rcWork.left)   rect.left = rcWork.left;
+	if(rect.top    < rcWork.top)    rect.top  = rcWork.top;
 
-			SetWindowPos(hwnd, 0, rect.left, rect.top, 0, 0, SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOSIZE);
-		}
-	}
+	SetWindowPos(hwnd, 0, rect.left, rect.top, 0, 0, SWP_NOACTIVATE|SWP_NOZORDER|SWP_NOSIZE);
 }
 
 void GetPinnedPosition(HWND hwnd, POINT *pt)
@@ -129,8 +136,11 @@ void GetPinnedPosition(HWND hwnd, POINT *pt)
 	RECT rcDisplay;
 	int  centreX, centreY, midX, midY;
 
-	//
-	GetWindowRect(hwnd, &rect);
+	// If hwnd is invalid (e.g. already destroyed), GetWindowRect fails
+	// and leaves rect untouched/garbage - bail out rather than silently
+	// computing a corner/anchor from junk data and corrupting *pt.
+	if(!GetWindowRect(hwnd, &rect))
+		return;
 
 	// get
 //	SystemParametersInfo(SPI_GETWORKAREA, 0, &rcDisplay, FALSE);
