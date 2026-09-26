@@ -533,8 +533,25 @@ END
 //
 
 IDB_SELBOX              PNG                     "selbox.png"
+
+// Finder-tool crosshair, baked at all 7 standard Windows scaling presets
+// (100/125/150/175/200/225/250% of the 96dpi base) so almost every real
+// monitor's DPI gets an exact baked size with no runtime GDI stretch -
+// see FindTool.c's g_finderVariants.
 IDB_DRAGTOOL1           PNG                     "finder1.png"
 IDB_DRAGTOOL2           PNG                     "finder2.png"
+IDB_DRAGTOOL1_125       PNG                     "finder1_125.png"
+IDB_DRAGTOOL1_150       PNG                     "finder1_150.png"
+IDB_DRAGTOOL1_175       PNG                     "finder1_175.png"
+IDB_DRAGTOOL1_200       PNG                     "finder1_200.png"
+IDB_DRAGTOOL1_225       PNG                     "finder1_225.png"
+IDB_DRAGTOOL1_250       PNG                     "finder1_250.png"
+IDB_DRAGTOOL2_125       PNG                     "finder2_125.png"
+IDB_DRAGTOOL2_150       PNG                     "finder2_150.png"
+IDB_DRAGTOOL2_175       PNG                     "finder2_175.png"
+IDB_DRAGTOOL2_200       PNG                     "finder2_200.png"
+IDB_DRAGTOOL2_225       PNG                     "finder2_225.png"
+IDB_DRAGTOOL2_250       PNG                     "finder2_250.png"
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
