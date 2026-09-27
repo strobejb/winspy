@@ -36,7 +36,7 @@ jobs:
       run: 
         echo "TARGET_PATH=bin\${{matrix.platform}}\${{matrix.configuration}}\${{env.TARGET_FILENAME}}" 
              "PACKAGE_NAME=./WinSpy_${{matrix.configuration}}_${{matrix.platform}}.zip" 
-             | Out-File -FilePath $env:GITHUB_ENV
+             "RAW_NAME=./WinSpy_${{matrix.platform}}.exe" | Out-File -FilePath $env:GITHUB_ENV
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
@@ -60,6 +60,9 @@ jobs:
       run: msbuild /m 
         /p:Configuration=${{matrix.configuration}} 
         /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Prepare standalone executable
+      run: Copy-Item "${{env.TARGET_PATH}}" "${{env.RAW_NAME}}"        
     
     - name: Package
       run: 
@@ -71,7 +74,11 @@ jobs:
         Compress-Archive @compress
       
     - name: Publish
-      run: gh release upload ${{github.ref_name}} ${{env.PACKAGE_NAME}}      
-      env: 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+      run: >
+        gh release upload ${{github.ref_name}}
+        ${{env.PACKAGE_NAME}}
+        ${{env.RAW_NAME}}
+        --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
