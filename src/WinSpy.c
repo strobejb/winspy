@@ -68,6 +68,42 @@ DialogTab WinSpyTab[NUMTABCONTROLITEMS] =
 
 static int nCurrentTab = 0;
 
+void GetRemoteInfo(HWND hwnd);
+
+static void DisplayCurrentTabInfo(HWND hwnd)
+{
+	if(hwnd == 0) return;
+
+	switch(nCurrentTab)
+	{
+	case GENERAL_TAB:
+		SetGeneralInfo(hwnd);
+		break;
+
+	case STYLE_TAB:
+		SetStyleInfo(hwnd);
+		break;
+
+	case PROPERTY_TAB:
+		SetPropertyInfo(hwnd);
+		break;
+
+	case CLASS_TAB:
+		GetRemoteInfo(hwnd);
+		SetClassInfo(hwnd);
+		break;
+
+	case WINDOW_TAB:
+		SetWindowInfo(hwnd);
+		SetScrollbarInfo(hwnd);
+		break;
+
+	case PROCESS_TAB:
+		SetProcessInfo(hwnd);
+		break;
+	}
+}
+
 //
 //	Try to get class information normally - if
 //  it's a private application class, then we need to 
@@ -135,19 +171,13 @@ void DisplayWindowInfo(HWND hwnd)
 		spy_fPassword = FALSE;
 
 
-	// do classinfo first, so we can get the window procedure
-	if(spy_fPassword || nCurrentTab == CLASS_TAB)
+	// Password edit controls need the remote text before General can show it.
+	if(spy_fPassword && nCurrentTab != CLASS_TAB)
 	{
 		GetRemoteInfo(hwnd);
-		SetClassInfo(hwnd);
 	}
 
-	SetGeneralInfo(hwnd);
-	SetStyleInfo(hwnd);
-	SetPropertyInfo(hwnd);
-	SetWindowInfo(hwnd);
-	SetScrollbarInfo(hwnd);
-	SetProcessInfo(hwnd);
+	DisplayCurrentTabInfo(hwnd);
 }
 
 //
@@ -667,12 +697,8 @@ UINT WinSpyDlg_NotifyHandler(HWND hwnd, WPARAM wParam, NMHDR *hdr)
 		nCurrentTab = TabCtrl_GetCurSel(hdr->hwndFrom);
 		
 		SetWindowPos(WinSpyTab[nCurrentTab].hwnd, HWND_TOP, 0,0,0,0, SWP_SHOWONLY);
-		
-		if(nCurrentTab == CLASS_TAB)
-		{
-			GetRemoteInfo(spy_hCurWnd);
-			SetClassInfo(spy_hCurWnd);
-		}
+
+		DisplayCurrentTabInfo(spy_hCurWnd);
 		
 		return TRUE;
 		
