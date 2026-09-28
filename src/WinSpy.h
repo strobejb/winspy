@@ -173,6 +173,7 @@ BOOL RemoveTabCtrlFlicker(HWND hwndTab);
 void VerboseClassName(TCHAR ach[]);
 
 void RefreshTreeView(HWND hwndTree);
+BOOL PopulateProcessWindowTree(HWND hwndTree, HTREEITEM hProcessRoot);
 void InitGlobalWindowTree(HWND hwnd);
 void DeInitGlobalWindowTree(HWND hwnd);
 void InitStockStyleLists();

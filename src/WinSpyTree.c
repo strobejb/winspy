@@ -54,6 +54,7 @@ typedef struct
 {
 	DWORD		 dwProcessId;
 	HTREEITEM    hRoot;			    //Main root. Not used?
+	BOOL         fLoaded;
 
 	WinStackType windowStack[MAX_WINDOW_DEPTH];
 	int          nWindowZ;			//Current position in the window stack
@@ -62,6 +63,7 @@ typedef struct
 
 static WinProc *WinStackList;
 int WinStackCount;
+static int WinStackCapacity;
 
 //static WinStackType WindowStack[MAX_WINDOW_DEPTH];
 //static int          nWindowZ = 0;		//Current position in the window stack
@@ -288,10 +290,42 @@ int FormatWindowText(HWND hwnd, TCHAR szTotal[])
 //
 //
 //
+static BOOL EnsureProcessCapacity()
+{
+	WinProc *pNewList;
+	int      nNewCapacity;
+
+	if(WinStackCount < WinStackCapacity)
+		return TRUE;
+
+	nNewCapacity = WinStackCapacity == 0 ? 128 : WinStackCapacity * 2;
+	pNewList = (WinProc *)realloc(WinStackList, nNewCapacity * sizeof(WinStackList[0]));
+
+	if(pNewList == 0)
+		return FALSE;
+
+	WinStackList = pNewList;
+	WinStackCapacity = nNewCapacity;
+
+	return TRUE;
+}
+
+static WinProc *FindProcessWindowStack(DWORD pid)
+{
+	int i;
+
+	for(i = 0; i < WinStackCount; i++)
+	{
+		if(WinStackList[i].dwProcessId == pid)
+			return &WinStackList[i];
+	}
+
+	return 0;
+}
+
 WinProc *GetProcessWindowStack(HWND hwndTree, HWND hwnd)
 {
 	DWORD			pid;
-	int				i;
 	TVINSERTSTRUCT	tv;
 	TCHAR			ach[MIN_FORMAT_LEN];
 	TCHAR			name[100] = _T("");
@@ -299,50 +333,79 @@ WinProc *GetProcessWindowStack(HWND hwndTree, HWND hwnd)
 	SHFILEINFO		shfi = { 0 };
 	HIMAGELIST		hImgList;
 	HTREEITEM		hRoot;
+	int             iImage;
+	int             iProcessImage;
+	WinProc        *winProc;
 
 	GetWindowThreadProcessId(hwnd, &pid);
 
 	//
 	// look for an existing process/window stack:
 	//
-	for(i = 0; i < WinStackCount; i++)
-	{
-		if(WinStackList[i].dwProcessId == pid)
-			return &WinStackList[i];
-	}
-
+	winProc = FindProcessWindowStack(pid);
+	if(winProc)
+		return winProc;
 
 	//
 	// couldn't find one - build a new one instead
 	//
+	if(!EnsureProcessCapacity())
+		return 0;
+
 	GetProcessNameByPid(pid, name, 100, path, MAX_PATH);
 	wsprintf(ach, _T("%s  (%d)"), name, pid);
 
-	SHGetFileInfo(path, 0, &shfi, sizeof(shfi), SHGFI_SMALLICON | SHGFI_ICON);
+	iImage = DESKTOP_IMAGE;
 	hImgList = TreeView_GetImageList(hwndTree, TVSIL_NORMAL);
+
+	if(SHGetFileInfo(path, 0, &shfi, sizeof(shfi), SHGFI_SMALLICON | SHGFI_ICON) && shfi.hIcon)
+	{
+		iProcessImage = ImageList_AddIcon(hImgList, shfi.hIcon);
+		if(iProcessImage != -1)
+			iImage = iProcessImage;
+
+		DestroyIcon(shfi.hIcon);
+	}
 	
 	
 	// Add the root item
 	tv.hParent              = TVI_ROOT;
 	tv.hInsertAfter         = TVI_LAST;
-	tv.item.mask            = TVIF_STATE|TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM;
+	tv.item.mask            = TVIF_STATE|TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM|TVIF_CHILDREN;
 	tv.item.state           = 0;//TVIS_EXPANDED;
 	tv.item.stateMask       = 0;//TVIS_EXPANDED;
 	tv.item.pszText         = ach;
 	tv.item.cchTextMax      = lstrlen(ach);
-	tv.item.iImage          = ImageList_AddIcon(hImgList, shfi.hIcon);//DESKTOP_IMAGE;
+	tv.item.iImage          = iImage;
 	tv.item.iSelectedImage  = tv.item.iImage;
 	tv.item.lParam          = (LPARAM)GetDesktopWindow();
+	tv.item.cChildren       = 1;
 
 	hRoot = TreeView_InsertItem(hwndTree, &tv);
 	WinStackList[WinStackCount].hRoot		= hRoot;//TVI_ROOT ;
 	WinStackList[WinStackCount].dwProcessId = pid;
+	WinStackList[WinStackCount].fLoaded     = FALSE;
 	WinStackList[WinStackCount].nWindowZ	= 1;
 	WinStackList[WinStackCount].windowStack[0].hRoot = hRoot;
 	WinStackList[WinStackCount].windowStack[0].hwnd  = 0;
 
 	return &WinStackList[WinStackCount++];
 }
+
+BOOL CALLBACK ProcessRootProc(HWND hwnd, LPARAM lParam)
+{
+	GetProcessWindowStack((HWND)lParam, hwnd);
+	return TRUE;
+}
+
+typedef struct
+{
+	HWND      hwndTree;
+	WinProc  *winProc;
+	HTREEITEM hTreeLast;
+	HWND      hwndLast;
+
+} WindowLoadContext;
 
 //
 // Callback function which is called once for every window in
@@ -351,11 +414,13 @@ WinProc *GetProcessWindowStack(HWND hwndTree, HWND hwnd)
 //
 BOOL CALLBACK AllWindowProc(HWND hwnd, LPARAM lParam)
 {
-	HWND hwndTree = (HWND)lParam;
+	WindowLoadContext *ctx = (WindowLoadContext *)lParam;
+	HWND hwndTree = ctx->hwndTree;
 	
 	static TCHAR szTotal[MIN_FORMAT_LEN];
 	
 	int i, idx;
+	DWORD pid;
 
 	// Style is used to decide which bitmap to display in the tree
 	UINT uStyle = GetWindowLong(hwnd, GWL_STYLE);
@@ -364,19 +429,16 @@ BOOL CALLBACK AllWindowProc(HWND hwnd, LPARAM lParam)
 	// where to insert this window
 	HWND  hwndParent = GetParent(hwnd);
 
-	// Keep track of the last window to be inserted, so
-	// we know the z-order of the current window
-	static HTREEITEM hTreeLast;
-	static HWND		 hwndLast;
-
 	TVINSERTSTRUCT tv;
+	WinProc *winProc;
+	WinStackType *WindowStack;
 
-	//
-	//	
-	//
-	//
-	WinProc *winProc = GetProcessWindowStack(hwndTree, hwnd);
-	WinStackType *WindowStack = winProc->windowStack;
+	GetWindowThreadProcessId(hwnd, &pid);
+	if(pid != ctx->winProc->dwProcessId)
+		return TRUE;
+
+	winProc = ctx->winProc;
+	WindowStack = winProc->windowStack;
 
 
 	idx = FormatWindowText(hwnd, szTotal);
@@ -437,16 +499,18 @@ BOOL CALLBACK AllWindowProc(HWND hwnd, LPARAM lParam)
 	if(winProc->nWindowZ > 0 && hwndParent != WindowStack[winProc->nWindowZ - 1].hwnd)
 	{
 		//we have another child window
-		if(GetParent(hwnd) == hwndLast)
+		if(GetParent(hwnd) == ctx->hwndLast)
 		{
 			//make a new parent stack entry
-			WindowStack[winProc->nWindowZ].hRoot = hTreeLast;
-			WindowStack[winProc->nWindowZ].hwnd  = hwndParent;
+			if(winProc->nWindowZ < MAX_WINDOW_DEPTH)
+			{
+				WindowStack[winProc->nWindowZ].hRoot = ctx->hTreeLast;
+				WindowStack[winProc->nWindowZ].hwnd  = hwndParent;
 			
-			if(winProc->nWindowZ < MAX_WINDOW_DEPTH-1) 
 				winProc->nWindowZ++;
+			}
 
-			tv.hParent = hTreeLast;
+			tv.hParent = ctx->hTreeLast;
 		}
 		//moving back?????
 		else
@@ -471,9 +535,54 @@ BOOL CALLBACK AllWindowProc(HWND hwnd, LPARAM lParam)
 	}
 	
 	// Finally add the node
-	hTreeLast = TreeView_InsertItem(hwndTree, &tv);
-	hwndLast  = hwnd;
+	ctx->hTreeLast = TreeView_InsertItem(hwndTree, &tv);
+	ctx->hwndLast  = hwnd;
 	
+	return TRUE;
+}
+
+BOOL PopulateProcessWindowTree(HWND hwndTree, HTREEITEM hProcessRoot)
+{
+	int               i;
+	WinProc          *winProc = 0;
+	WindowLoadContext ctx;
+	TVITEM           item;
+
+	for(i = 0; i < WinStackCount; i++)
+	{
+		if(WinStackList[i].hRoot == hProcessRoot)
+		{
+			winProc = &WinStackList[i];
+			break;
+		}
+	}
+
+	if(winProc == 0 || winProc->fLoaded)
+		return FALSE;
+
+	winProc->nWindowZ = 1;
+	winProc->windowStack[0].hRoot = winProc->hRoot;
+	winProc->windowStack[0].hwnd  = 0;
+
+	ctx.hwndTree  = hwndTree;
+	ctx.winProc   = winProc;
+	ctx.hTreeLast = 0;
+	ctx.hwndLast  = 0;
+
+	SendMessage(hwndTree, WM_SETREDRAW, FALSE, 0);
+	EnumChildWindows(GetDesktopWindow(), AllWindowProc, (LPARAM)&ctx);
+
+	winProc->fLoaded = TRUE;
+
+	ZeroMemory(&item, sizeof(item));
+	item.mask = TVIF_HANDLE | TVIF_CHILDREN;
+	item.hItem = hProcessRoot;
+	item.cChildren = TreeView_GetChild(hwndTree, hProcessRoot) != 0;
+	TreeView_SetItem(hwndTree, &item);
+
+	SendMessage(hwndTree, WM_SETREDRAW, TRUE, 0);
+	InvalidateRect(hwndTree, 0, TRUE);
+
 	return TRUE;
 }
 
@@ -485,34 +594,10 @@ BOOL CALLBACK AllWindowProc(HWND hwnd, LPARAM lParam)
 void FillGlobalWindowTree(HWND hwnd)
 {
 	HWND hwndTree = GetDlgItem(hwnd, IDC_TREE1);
-	TVINSERTSTRUCT tv;
-	static TCHAR ach[MIN_FORMAT_LEN];
 
-	FormatWindowText(GetDesktopWindow(), ach);
-	
-	//Add the root item
-	tv.hParent              = TVI_ROOT;
-	tv.hInsertAfter         = TVI_LAST;
-	tv.item.mask            = TVIF_STATE|TVIF_TEXT|TVIF_IMAGE|TVIF_SELECTEDIMAGE|TVIF_PARAM;
-	tv.item.state           = TVIS_EXPANDED;
-	tv.item.stateMask       = TVIS_EXPANDED;
-	tv.item.pszText         = ach;
-	tv.item.cchTextMax      = lstrlen(ach);
-	tv.item.iImage          = DESKTOP_IMAGE;
-	tv.item.iSelectedImage  = DESKTOP_IMAGE;
-	tv.item.lParam          = (LPARAM)GetDesktopWindow();
-	//tv.itemex.iIntegral = 1;
-
-	//hRoot = TreeView_InsertItem(hwndTree, &tv);
-	
-	//WindowStack[0].hRoot = hRoot;
-	//WindowStack[0].hwnd = 0;
-
-	//nWindowZ = 1;
-
-	// EnumChildWindows does the hard work for us
-	// 
-	EnumChildWindows(GetDesktopWindow(), AllWindowProc, (LPARAM)hwndTree);
+	// Build the process roots quickly; each process' window hierarchy is
+	// filled when that process node is expanded.
+	EnumChildWindows(GetDesktopWindow(), ProcessRootProc, (LPARAM)hwndTree);
 }
 
 //
@@ -597,6 +682,13 @@ void DeInitGlobalWindowTree(HWND hwndTree)
 {
 	TreeView_SetImageList(hwndTree, 0, TVSIL_NORMAL);
 	ImageList_Destroy(hImgList);
+
+	if(WinStackList)
+		free(WinStackList);
+
+	WinStackList = 0;
+	WinStackCount = 0;
+	WinStackCapacity = 0;
 }
 
 //
@@ -629,6 +721,8 @@ HTREEITEM FindTreeItemByHwnd(HWND hwndTree, HWND hwndTarget, HTREEITEM hItem)
 			// Recursively traverse child items.
             HTREEITEM hItemFound, hItemChild;
 
+			PopulateProcessWindowTree(hwndTree, hItem);
+
             hItemChild = (HTREEITEM)SendMessage(hwndTree, TVM_GETNEXTITEM, TVGN_CHILD, (LPARAM)hItem);
 
             hItemFound = FindTreeItemByHwnd(hwndTree, hwndTarget, hItemChild);
@@ -653,8 +747,12 @@ void RefreshTreeView(HWND hwndTree)
 {
 	DWORD dwStyle;
 
-	WinStackList  = (WinProc*)malloc(1000 * sizeof(WinStackList[0]));
+	if(WinStackList)
+		free(WinStackList);
+
+	WinStackList = 0;
 	WinStackCount = 0;
+	WinStackCapacity = 0;
 
 	EnableWindow(hwndTree, TRUE);
 		
@@ -679,6 +777,4 @@ void RefreshTreeView(HWND hwndTree)
 
 	InvalidateRect(hwndTree, 0, TRUE);
 
-	//free(WinStackList);
-	WinStackList = 0;
 }

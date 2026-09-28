@@ -726,6 +726,13 @@ UINT WinSpyDlg_NotifyHandler(HWND hwnd, WPARAM wParam, NMHDR *hdr)
 		}
 		
 		return TRUE;
+
+	case TVN_ITEMEXPANDING:
+
+		if(nmtv->action == TVE_EXPAND)
+			PopulateProcessWindowTree(hdr->hwndFrom, nmtv->itemNew.hItem);
+
+		return FALSE;
 		
 	// TreeView selection has changed, so update the main window properties
 	case TVN_SELCHANGED:
