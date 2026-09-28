@@ -4,6 +4,10 @@ WinSpy++ is a programmer's utility for inspecting and modifying window propertie
 
 
 
+!\[WinSpy](winspy.png)
+
+
+
 ## Building WinSpy
 
 
