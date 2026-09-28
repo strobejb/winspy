@@ -217,10 +217,13 @@ UINT CALLBACK WndFindProc(HWND hwndTool, UINT uCode, HWND hwnd)
 		if(fMinimizeWinSpy || fFirstDrag)
 		{
 			fFirstDrag = FALSE;
+			DisplayWindowInfo(spy_hCurWnd);
 			SetWindowLayout(hwndMain, WINSPY_LASTMAX);
 		}
-
-		DisplayWindowInfo(spy_hCurWnd);
+		else
+		{
+			DisplayWindowInfo(spy_hCurWnd);
+		}
 		
 		if(fMinimizeWinSpy)
 		{
