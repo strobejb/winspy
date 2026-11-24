@@ -10,6 +10,16 @@ WinSpy++ is a programmer's utility for inspecting and modifying window propertie
 
 </p>
 
+## Installation
+
+WinSpy is available via the Windows Package Manager (WinGet):
+
+```powershell
+winget install --id Catch22.WinSpy -e
+```
+
+Alternatively, download the latest x86 or x64 binaries from the
+[GitHub Releases](https://github.com/strobejb/winspy/releases/latest) page.
 
 
 ## Building WinSpy
