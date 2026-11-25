@@ -7,8 +7,7 @@ name: Create Release
 
 on:
   release:
-    types:
-      - created
+    types: [published]
       
 env:
   # Path to the solution file relative to the root of the project.
@@ -30,7 +29,7 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v7
     
     - name: Set variables
       run: 
@@ -39,7 +38,7 @@ jobs:
              "RAW_NAME=./WinSpy_${{matrix.platform}}.exe" | Out-File -FilePath $env:GITHUB_ENV
 
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v3
       
     - name: Increment version
       shell: python
@@ -61,24 +60,62 @@ jobs:
         /p:Configuration=${{matrix.configuration}} 
         /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
 
-    - name: Prepare standalone executable
-      run: Copy-Item "${{env.TARGET_PATH}}" "${{env.RAW_NAME}}"        
-    
-    - name: Package
-      run: 
-        $compress = @{
-          Path = "${{env.TARGET_PATH}}", "LICENCE.TXT", "README.md";
-          CompressionLevel = "Optimal";
-          DestinationPath = "${{env.PACKAGE_NAME}}"
-        };
-        Compress-Archive @compress
-      
     - name: Publish
-      run: >
-        gh release upload ${{github.ref_name}}
-        ${{env.PACKAGE_NAME}}
-        ${{env.RAW_NAME}}
-        --clobber
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        $PSNativeCommandUseErrorActionPreference = $true
+        $tag = $env:GITHUB_REF_NAME
+        $rawName = Split-Path -Leaf $env:RAW_NAME
+        $packageName = Split-Path -Leaf $env:PACKAGE_NAME
+        $assets = gh release view $tag --json assets --jq '.assets[].name'
+
+        # Preserve published files so retries cannot change the hashes in WinGet.
+        if ($rawName -notin $assets) {
+          Copy-Item $env:TARGET_PATH $env:RAW_NAME
+          gh release upload $tag $env:RAW_NAME
+        } elseif ($packageName -notin $assets) {
+          gh release download $tag --pattern $rawName --output $env:TARGET_PATH --clobber
+        }
+
+        if ($packageName -notin $assets) {
+          Compress-Archive -Path $env:TARGET_PATH, 'LICENCE.TXT', 'README.md' -CompressionLevel Optimal -DestinationPath $env:PACKAGE_NAME
+          gh release upload $tag $env:PACKAGE_NAME
+        }
+
+  winget:
+    name: Submit WinGet update
+    needs: build
+    if: ${{ github.repository == 'strobejb/winspy' && !github.event.release.prerelease }}
+    runs-on: windows-latest
+    permissions: {}
+    steps:
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Download WinGetCreate
+      run: |
+        $tool = Join-Path $env:RUNNER_TEMP 'wingetcreate.exe'
+        Invoke-WebRequest 'https://github.com/microsoft/winget-create/releases/download/v1.28.1.0/wingetcreate.exe' -OutFile $tool
+        $sha256 = '63d980ba79e97042395bd6eb5992c2db9e01e9e7a8a22958a95c288f27310413'
+        if ((Get-FileHash -LiteralPath $tool -Algorithm SHA256).Hash -ne $sha256) {
+          throw 'WinGetCreate download failed SHA-256 verification.'
+        }
+
+    - name: Open WinGet pull request
+      env:
+        WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}
+      run: |
+        $PSNativeCommandUseErrorActionPreference = $true
+        if (-not $env:WINGET_CREATE_GITHUB_TOKEN) {
+          throw 'Add the WINGET_CREATE_GITHUB_TOKEN Actions secret before submitting to WinGet.'
+        }
+        if ($env:GITHUB_REF_NAME -notmatch '^v(\d+\.\d+\.\d+)$') {
+          throw 'WinGet releases require a tag in the form vX.Y.Z.'
+        }
+        $version = $Matches[1]
+        $base = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/releases/download/$env:GITHUB_REF_NAME"
+        & (Join-Path $env:RUNNER_TEMP 'wingetcreate.exe') update Catch22.WinSpy --version $version `
+          --urls "$base/WinSpy_x64.exe|x64" "$base/WinSpy_x86.exe|x86" --submit

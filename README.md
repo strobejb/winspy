@@ -37,7 +37,17 @@ For command-line builds, `/p:FinderMenuVariant=A`, `/p:FinderMenuVariant=B`, and
 `/p:FinderMenuVariant=C` select the integrated dropdown, cog, and stopwatch
 dropdown respectively.
 
-Release binaries for x86 and x64 are built automatically by GitHub Actions when a GitHub release is created.
+## Publishing a release
+
+Publish a GitHub release tagged `vX.Y.Z` to build and upload the x86 and x64
+binaries. For stable releases, the workflow then uses the uploaded executables
+to generate the `Catch22.WinSpy` manifests and open a pull request in
+[`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs).
+
+Before the first automated submission, add a repository Actions secret named
+`WINGET_CREATE_GITHUB_TOKEN` with a [classic GitHub token with the `public_repo`
+scope](https://github.com/microsoft/winget-create/blob/main/doc/token.md).
+If submission fails, fix the issue and rerun the **Submit WinGet update** job.
 
 ## Features
 
