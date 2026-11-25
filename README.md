@@ -1,4 +1,5 @@
 ## WinSpy++
+[![WinGet](https://img.shields.io/badge/winget-Catch22.WinSpy-0078D7)](https://github.com/microsoft/winget-pkgs/tree/master/manifests/c/Catch22/WinSpy)
 
 WinSpy++ is a programmer's utility for inspecting and modifying window properties of any Windows program. 
 
