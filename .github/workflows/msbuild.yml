@@ -46,7 +46,7 @@ jobs:
       run: msbuild /m /p:Configuration=${{matrix.configuration}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
    
     - name: Package
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v7
       with:
         name: WinSpy_${{matrix.configuration}}_${{matrix.platform}}
         path: bin\${{matrix.platform}}\${{matrix.configuration}}\winspy.exe
