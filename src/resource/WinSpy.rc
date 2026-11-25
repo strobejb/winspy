@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "windows.h"
+#include "winres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -23,9 +23,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 // Dialog
 //
-#ifndef IDC_STATIC
-#define IDC_STATIC -1
-#endif
 
 IDD_TAB_GENERAL DIALOGEX 0, 0, 230, 170
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPCHILDREN
@@ -184,18 +181,17 @@ BEGIN
     LTEXT           "",IDC_VPAGE,78,148,128,8
 END
 
-IDD_MAIN DIALOGEX 0, 0, 434, 251
+IDD_MAIN DIALOGEX 0, 0, 319, 184
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "WinSpy++"
 CLASS "WinSpy"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    CONTROL         103,IDC_DRAGGER,"Static",SS_BITMAP | SS_NOTIFY,7,5,21,17
-    LTEXT           "Drag the Finder Tool over a window to select it, then release the mouse",IDC_STATIC,36,6,121,18
-    CONTROL         "&Hidden Windows",IDC_HIDDEN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,3,70,10
-    CONTROL         "Minimi&ze WinSpy++",IDC_MINIMIZE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,14,77,10
+    CONTROL         IDB_DRAGTOOL1_100,IDC_DRAGGER,"Static",SS_BITMAP | SS_NOTIFY,7,5,21,17
+    CONTROL         "Capture options",IDC_FINDER_MENU,"Button",BS_OWNERDRAW | WS_TABSTOP,222,3,23,17
+    LTEXT           "Drag the Finder Tool\nto select a window",IDC_FINDER_HINT,44,6,121,18
     CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",TCS_RAGGEDRIGHT | WS_TABSTOP,7,31,242,191
-    CONTROL         "Tree1",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP,261,55,46,55,WS_EX_CLIENTEDGE
+    CONTROL         "Tree1",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | WS_BORDER | WS_HSCROLL | WS_TABSTOP,261,55,46,55,WS_EX_CLIENTEDGE
     CONTROL         "Tab2",IDC_TAB2,"SysTabControl32",TCS_FOCUSNEVER,258,4,64,44
     PUSHBUTTON      "&Capture",IDC_CAPTURE,7,230,50,14
     DEFPUSHBUTTON   "Close",IDOK,65,230,50,14
@@ -203,6 +199,7 @@ BEGIN
     PUSHBUTTON      "&Refresh",IDC_REFRESH,258,230,50,14,BS_CENTER | BS_VCENTER
     PUSHBUTTON      "&Locate",IDC_LOCATE,316,230,50,14
     PUSHBUTTON      "&Flash",IDC_FLASH,374,230,50,14
+    LTEXT           "Delayed Capture\n&& Settings",IDC_FINDER_HINT2,117,6,103,19,0,WS_EX_RIGHT
 END
 
 IDD_STYLE_EDIT DIALOGEX 0, 0, 250, 133
@@ -218,7 +215,7 @@ BEGIN
     DEFPUSHBUTTON   "&Apply",IDC_APPLY,193,7,50,14
     PUSHBUTTON      "Close",IDCANCEL,193,24,50,14
     PUSHBUTTON      "&Clear",IDC_CLEAR,193,47,50,14
-    CONTROL         103,IDC_DRAGGER,"Static",SS_BITMAP | SS_NOTIFY,207,100,21,17
+    CONTROL         IDB_DRAGTOOL1_100,IDC_DRAGGER,"Static",SS_BITMAP | SS_NOTIFY,207,100,21,17
     GROUPBOX        "Copy Style",IDC_STATIC,193,86,50,39,BS_CENTER
 END
 
@@ -266,6 +263,16 @@ BEGIN
     DEFPUSHBUTTON   "&Adjust",IDC_ADJUST,148,7,50,14
     PUSHBUTTON      "Close",IDCANCEL,148,24,50,14
     PUSHBUTTON      "&Reset",IDC_RESET,148,55,50,14
+END
+
+IDD_CAPTURE_HOTKEY DIALOGEX 0, 0, 184, 63
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Register hotkey sequence"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "Press a key or key combination.",IDC_CAPTURE_HOTKEY_PROMPT,7,7,170,10
+    EDITTEXT        IDC_CAPTURE_HOTKEY,7,21,170,14,ES_READONLY | ES_AUTOHSCROLL
+    PUSHBUTTON      "Cancel",IDCANCEL,127,42,50,14
 END
 
 IDD_TAB_PROCESS DIALOGEX 0, 0, 230, 170
@@ -344,9 +351,7 @@ BEGIN
     IDD_MAIN, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 427
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 244
+        TOPMARGIN, 3
     END
 
     IDD_STYLE_EDIT, DIALOG
@@ -397,7 +402,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""afxres.h""\r\n"
+    "#include ""winres.h""\r\n"
     "\0"
 END
 
@@ -416,10 +421,15 @@ END
 //
 
 IDB_WINDOW_INVISIBLE    BITMAP                  "bitmap6.bmp"
+
 IDB_WINDOW_VISIBLE      BITMAP                  "bitmap5.bmp"
+
 IDB_CHECK1              BITMAP                  "bitmap3.bmp"
+
 IDB_CHECK2              BITMAP                  "bitmap4.bmp"
+
 IDB_PIN_BITMAP          BITMAP                  "bitmap7.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -427,6 +437,7 @@ IDB_PIN_BITMAP          BITMAP                  "bitmap7.bmp"
 //
 
 IDC_CURSOR1             CURSOR                  "cursor1.cur"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -436,12 +447,21 @@ IDC_CURSOR1             CURSOR                  "cursor1.cur"
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON1               ICON                    "icon1.ico"
+
 IDI_ICON5               ICON                    "icon2.ico"
+
 IDI_ICON10              ICON                    "icon3.ico"
+
 IDI_ICON17              ICON                    "icon4.ico"
+
 IDI_ICON16              ICON                    "icon5.ico"
+
 IDI_ICON18              ICON                    "icon6.ico"
+
 IDI_ICON_SYSMENU        ICON                    "icon7.ico"
+
+IDI_FINDER_COG          ICON                    "settingscog.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -492,6 +512,22 @@ BEGIN
     END
 END
 
+IDR_FINDER_MENU MENU
+BEGIN
+    POPUP "Capture options"
+    BEGIN
+        MENUITEM "Capture after &3 seconds",    IDM_CAPTURE_DELAY_3
+        MENUITEM "Capture after &5 seconds",    IDM_CAPTURE_DELAY_5
+        MENUITEM "Capture after 1&0 seconds",   IDM_CAPTURE_DELAY_10
+        MENUITEM "Capture using hot&key...",    IDM_CAPTURE_HOTKEY
+        MENUITEM SEPARATOR
+        MENUITEM "&Settings...",               IDM_WINSPY_OPTIONS
+        MENUITEM SEPARATOR
+        MENUITEM "&Minimize WinSpy++",          IDM_CAPTURE_MINIMIZE
+        MENUITEM "&Hidden windows",             IDM_CAPTURE_HIDDEN
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -521,13 +557,6 @@ BEGIN
 END
 
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// RT_MANIFEST
-//
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // PNG
@@ -535,24 +564,34 @@ END
 
 IDB_SELBOX              PNG                     "selbox.png"
 
-// Finder-tool crosshair, baked at all 7 standard Windows scaling presets
-// (100/125/150/175/200/225/250% of the 96dpi base) so almost every real
-// monitor's DPI gets an exact baked size with no runtime GDI stretch -
-// see FindTool.c's g_finderVariants.
 IDB_DRAGTOOL1_100       PNG                     "finder1_100.png"
+
 IDB_DRAGTOOL2_100       PNG                     "finder2_100.png"
+
 IDB_DRAGTOOL1_125       PNG                     "finder1_125.png"
+
 IDB_DRAGTOOL1_150       PNG                     "finder1_150.png"
+
 IDB_DRAGTOOL1_175       PNG                     "finder1_175.png"
+
 IDB_DRAGTOOL1_200       PNG                     "finder1_200.png"
+
 IDB_DRAGTOOL1_225       PNG                     "finder1_225.png"
+
 IDB_DRAGTOOL1_250       PNG                     "finder1_250.png"
+
 IDB_DRAGTOOL2_125       PNG                     "finder2_125.png"
+
 IDB_DRAGTOOL2_150       PNG                     "finder2_150.png"
+
 IDB_DRAGTOOL2_175       PNG                     "finder2_175.png"
+
 IDB_DRAGTOOL2_200       PNG                     "finder2_200.png"
+
 IDB_DRAGTOOL2_225       PNG                     "finder2_225.png"
+
 IDB_DRAGTOOL2_250       PNG                     "finder2_250.png"
+
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -564,7 +603,7 @@ IDB_DRAGTOOL2_250       PNG                     "finder2_250.png"
 // Generated from the TEXTINCLUDE 3 resource.
 //
 
-#include "version.rc"
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

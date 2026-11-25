@@ -17,6 +17,10 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Integrated|x64">
+      <Configuration>Release Integrated</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3E78711E-0602-4FD9-8F79-18EF3D5BA3CD}</ProjectGuid>
@@ -44,7 +48,7 @@
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Platform)'=='x64' And ('$(Configuration)'=='Release' Or '$(Configuration)'=='Release Integrated')" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -63,10 +67,20 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Platform)'=='x64' And ('$(Configuration)'=='Release' Or '$(Configuration)'=='Release Integrated')" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <FinderMenuVariant Condition="'$(FinderMenuVariant)' == '' And '$(Configuration)' == 'Release Integrated'">A</FinderMenuVariant>
+    <FinderMenuVariant Condition="'$(FinderMenuVariant)' == ''">B</FinderMenuVariant>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions Condition="'$(FinderMenuVariant)' == 'A'">WINSPY_FINDER_DROPDOWN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(FinderMenuVariant)' == 'C'">WINSPY_FINDER_TIMER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(PlatformShortName)\$(Configuration)\</OutDir>
@@ -84,7 +98,7 @@
     <OutDir>$(SolutionDir)bin\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <PropertyGroup Condition="'$(Platform)'=='x64' And ('$(Configuration)'=='Release' Or '$(Configuration)'=='Release Integrated')">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)bin\$(PlatformShortName)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
@@ -157,7 +171,7 @@
       <AdditionalManifestFiles>resource\winspy.exe.manifest</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64' And ('$(Configuration)'=='Release' Or '$(Configuration)'=='Release Integrated')">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
@@ -197,6 +211,7 @@
     <ClCompile Include="EditWindow.c" />
     <ClCompile Include="FindTool.c" />
     <ClCompile Include="FindToolTrans.c" />
+    <ClCompile Include="FinderCog.cpp" />
     <ClCompile Include="FunkyList.c" />
     <ClCompile Include="GetRemoteWindowInfo.c" />
     <ClCompile Include="InjectThread.c" />
@@ -239,6 +254,7 @@
     <None Include="resource\icon5.ico" />
     <None Include="resource\icon6.ico" />
     <None Include="resource\icon7.ico" />
+    <None Include="resource\settingscog.ico" />
     <None Include="resource\rt_manif.bin" />
     <None Include="resource\selbox.png" />
     <None Include="resource\selbox2.png" />

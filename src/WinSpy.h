@@ -116,6 +116,8 @@ UINT_PTR WinSpyDlg_FullWindowDrag	(HWND hwnd, WPARAM wParam, LPARAM lParam);
 
 UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam);
 UINT WinSpyDlg_SysMenuHandler(HWND hwnd, WPARAM wParam, LPARAM lParam);
+void WinSpy_ShowFinderMenu(HWND hwnd, POINT pt);
+BOOL CanUseSelectedWindow(void);
 
 void WinSpyDlg_SizeContents     (HWND hwnd);
 
@@ -145,6 +147,10 @@ void SetWindowInfo		(HWND hwnd);
 void SetClassInfo		(HWND hwnd);
 void SetStyleInfo		(HWND hwnd);
 void SetGeneralInfo		(HWND hwnd);
+void PreviewGeneralInfo(HWND hwnd);
+void CaptureGeneralInfo(HWND hwnd);
+void RestoreCapturedGeneralInfo(void);
+void ClearCapturedGeneralInfo(void);
 void SetScrollbarInfo	(HWND hwnd);
 void SetPropertyInfo	(HWND hwnd);
 void SetProcessInfo		(HWND hwnd);

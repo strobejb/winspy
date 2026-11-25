@@ -26,6 +26,7 @@
 #include "CaptureWindow.h"
 #include "BitmapButton.h"
 #include "Utils.h"
+#include "WindowFromPointEx.h"
 
 HWND		hwndPin;		// Toolbar with pin bitmap
 HWND		hwndSizer;		// Sizing grip for bottom-right corner
@@ -67,14 +68,37 @@ DialogTab WinSpyTab[NUMTABCONTROLITEMS] =
 };
 
 static int nCurrentTab = 0;
+static BOOL fFirstSelection = TRUE;
+
+#define DELAYED_CAPTURE_TIMER 1
+#define CAPTURE_HOTKEY_ID 1
+static ULONGLONG captureDeadline;
+static UINT captureSeconds;
+static BOOL captureHotkeyArmed;
+static TCHAR capturePreviousCaption[160];
+
+// The delayed snapshot lives in the tab controls. Track the original window
+// separately so commands that need a live target can check its identity.
+static HWND snapshotWindow;
+static DWORD snapshotThread;
+static DWORD snapshotProcess;
 
 void GetRemoteInfo(HWND hwnd);
 
-static void DisplayCurrentTabInfo(HWND hwnd)
+BOOL CanUseSelectedWindow(void)
 {
-	if(hwnd == 0) return;
+	DWORD process = 0;
 
-	switch(nCurrentTab)
+	if(!snapshotWindow || spy_hCurWnd != snapshotWindow)
+		return IsWindow(spy_hCurWnd);
+
+	return GetWindowThreadProcessId(snapshotWindow, &process) == snapshotThread &&
+		process == snapshotProcess;
+}
+
+static void DisplayTabInfo(HWND hwnd, int tab)
+{
+	switch(tab)
 	{
 	case GENERAL_TAB:
 		SetGeneralInfo(hwnd);
@@ -86,22 +110,32 @@ static void DisplayCurrentTabInfo(HWND hwnd)
 
 	case PROPERTY_TAB:
 		SetPropertyInfo(hwnd);
+		SetScrollbarInfo(hwnd);
 		break;
 
 	case CLASS_TAB:
-		GetRemoteInfo(hwnd);
 		SetClassInfo(hwnd);
 		break;
 
 	case WINDOW_TAB:
 		SetWindowInfo(hwnd);
-		SetScrollbarInfo(hwnd);
 		break;
 
 	case PROCESS_TAB:
 		SetProcessInfo(hwnd);
 		break;
 	}
+}
+
+static void DisplayCurrentTabInfo(HWND hwnd)
+{
+	if(!IsWindow(hwnd) || hwnd == snapshotWindow)
+		return;
+
+	if(nCurrentTab == CLASS_TAB)
+		GetRemoteInfo(hwnd);
+
+	DisplayTabInfo(hwnd, nCurrentTab);
 }
 
 //
@@ -139,15 +173,12 @@ void GetRemoteInfo(HWND hwnd)
 	}
 }
 
-//
-//	Top-level function for retrieving+displaying a window's
-//  information (styles/class/properties etc)
-//
-void DisplayWindowInfo(HWND hwnd)
+// Read the basic information shared by all the tabs.
+static void ReadWindowInfo(HWND hwnd)
 {
-	if(hwnd == 0) return;
 	spy_hCurWnd = hwnd;
 
+	spy_szClassName[0] = 0;
 	GetClassName(hwnd, spy_szClassName, 70);
 
 	if(IsWindowUnicode(hwnd))
@@ -169,7 +200,20 @@ void DisplayWindowInfo(HWND hwnd)
 	}
 	else
 		spy_fPassword = FALSE;
+}
 
+//
+//	Top-level function for retrieving+displaying a window's
+//  information (styles/class/properties etc)
+//
+void DisplayWindowInfo(HWND hwnd)
+{
+	if(!IsWindow(hwnd) || (hwnd == snapshotWindow && !CanUseSelectedWindow()))
+		return;
+
+	snapshotWindow = NULL;
+	ClearCapturedGeneralInfo();
+	ReadWindowInfo(hwnd);
 
 	// Password edit controls need the remote text before General can show it.
 	if(spy_fPassword && nCurrentTab != CLASS_TAB)
@@ -178,6 +222,302 @@ void DisplayWindowInfo(HWND hwnd)
 	}
 
 	DisplayCurrentTabInfo(hwnd);
+}
+
+static void StopPendingCapture(HWND hwnd, BOOL restoreCaption)
+{
+	if(captureDeadline)
+	{
+		KillTimer(hwnd, DELAYED_CAPTURE_TIMER);
+		captureDeadline = 0;
+	}
+	else if(captureHotkeyArmed)
+	{
+		UnregisterHotKey(hwnd, CAPTURE_HOTKEY_ID);
+		captureHotkeyArmed = FALSE;
+	}
+	else
+		return;
+
+	if(restoreCaption)
+		SetWindowText(hwnd, capturePreviousCaption);
+}
+
+static void SetCountdownCaption(HWND hwnd, UINT seconds)
+{
+	TCHAR caption[80];
+
+	captureSeconds = seconds;
+	wsprintf(caption, _T("%s - Capture in %u s"), szAppName, seconds);
+	SetWindowText(hwnd, caption);
+}
+
+static void StartDelayedCapture(HWND hwnd, UINT seconds)
+{
+	if(!SetTimer(hwnd, DELAYED_CAPTURE_TIMER, 100, NULL))
+	{
+		MessageBox(hwnd, _T("Could not start the capture timer."), szAppName, MB_ICONWARNING);
+		return;
+	}
+
+	GetWindowText(hwnd, capturePreviousCaption, ARRAYSIZE(capturePreviousCaption));
+	captureDeadline = GetTickCount64() + seconds * 1000;
+	SetCountdownCaption(hwnd, seconds);
+
+	if(fMinimizeWinSpy)
+		ShowWindow(hwnd, SW_MINIMIZE);
+}
+
+typedef struct
+{
+	UINT key;
+	UINT modifiers;
+	TCHAR text[96];
+} CaptureHotkey;
+
+static LRESULT CALLBACK CaptureHotkeyFieldProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam,
+	UINT_PTR subclass, DWORD_PTR data)
+{
+	CaptureHotkey *hotkey = (CaptureHotkey *)data;
+	HWND dialog = GetParent(hwnd);
+
+	switch(msg)
+	{
+	case WM_GETDLGCODE:
+		return DLGC_WANTALLKEYS;
+
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	{
+		UINT modifiers = 0;
+		TCHAR keyName[48];
+
+		if(wParam == VK_CONTROL || wParam == VK_SHIFT || wParam == VK_MENU ||
+			wParam == VK_LWIN || wParam == VK_RWIN || hotkey->key || (lParam & 0x40000000))
+			return 0;
+
+		if(GetKeyState(VK_CONTROL) < 0) modifiers |= MOD_CONTROL;
+		if(GetKeyState(VK_SHIFT) < 0) modifiers |= MOD_SHIFT;
+		if(GetKeyState(VK_MENU) < 0) modifiers |= MOD_ALT;
+		if(GetKeyState(VK_LWIN) < 0 || GetKeyState(VK_RWIN) < 0) modifiers |= MOD_WIN;
+
+		if(wParam == VK_ESCAPE && !modifiers)
+		{
+			EndDialog(dialog, IDCANCEL);
+			return 0;
+		}
+
+		hotkey->key = (UINT)wParam;
+		hotkey->modifiers = modifiers;
+		if(!GetKeyNameText((LONG)lParam, keyName, ARRAYSIZE(keyName)))
+			wsprintf(keyName, _T("Key 0x%02X"), hotkey->key);
+		wsprintf(hotkey->text, _T("%s%s%s%s%s"),
+			modifiers & MOD_CONTROL ? _T("Ctrl+") : _T(""),
+			modifiers & MOD_SHIFT ? _T("Shift+") : _T(""),
+			modifiers & MOD_ALT ? _T("Alt+") : _T(""),
+			modifiers & MOD_WIN ? _T("Win+") : _T(""), keyName);
+		SetWindowText(hwnd, hotkey->text);
+		return 0;
+	}
+
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		if(hotkey->key && wParam == hotkey->key)
+		{
+			UINT key = hotkey->key;
+			hotkey->key = 0;
+			// Register on release so the keystroke used to choose the
+			// shortcut cannot also trigger the capture.
+			if(RegisterHotKey(GetWindow(dialog, GW_OWNER), CAPTURE_HOTKEY_ID,
+				hotkey->modifiers | MOD_NOREPEAT, key))
+				EndDialog(dialog, IDOK);
+			else
+				SetDlgItemText(dialog, IDC_CAPTURE_HOTKEY_PROMPT,
+					_T("Hotkey unavailable. Try again."));
+		}
+		return 0;
+
+	case WM_CHAR:
+	case WM_SYSCHAR:
+		return 0;
+
+	case WM_KILLFOCUS:
+		hotkey->key = 0;
+		break;
+
+	case WM_NCDESTROY:
+		RemoveWindowSubclass(hwnd, CaptureHotkeyFieldProc, subclass);
+		break;
+	}
+
+	return DefSubclassProc(hwnd, msg, wParam, lParam);
+}
+
+static INT_PTR CALLBACK CaptureHotkeyDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(msg)
+	{
+	case WM_INITDIALOG:
+	{
+		HWND field = GetDlgItem(hwnd, IDC_CAPTURE_HOTKEY);
+		if(!SetWindowSubclass(field, CaptureHotkeyFieldProc, 0, (DWORD_PTR)lParam))
+			EndDialog(hwnd, IDCANCEL);
+		else
+			SetFocus(field);
+		return FALSE;
+	}
+
+	case WM_COMMAND:
+		if(LOWORD(wParam) == IDCANCEL)
+		{
+			EndDialog(hwnd, IDCANCEL);
+			return TRUE;
+		}
+		break;
+	}
+	return FALSE;
+}
+
+static void StartHotkeyCapture(HWND hwnd)
+{
+	CaptureHotkey hotkey = {0};
+	TCHAR caption[160];
+
+	if(DialogBoxParam(hInst, MAKEINTRESOURCE(IDD_CAPTURE_HOTKEY), hwnd,
+		CaptureHotkeyDlgProc, (LPARAM)&hotkey) != IDOK)
+		return;
+
+	captureHotkeyArmed = TRUE;
+	GetWindowText(hwnd, capturePreviousCaption, ARRAYSIZE(capturePreviousCaption));
+	wsprintf(caption, _T("%s - Press %s to capture"), szAppName, hotkey.text);
+	SetWindowText(hwnd, caption);
+
+	if(fMinimizeWinSpy)
+		ShowWindow(hwnd, SW_MINIMIZE);
+}
+
+void WinSpy_ShowFinderMenu(HWND hwnd, POINT pt)
+{
+	HMENU menu = LoadMenu(hInst, MAKEINTRESOURCE(IDR_FINDER_MENU));
+	HMENU popup;
+	UINT command;
+
+	if(!menu)
+		return;
+
+	// A pending capture must not fire in TrackPopupMenu's nested message loop.
+	StopPendingCapture(hwnd, TRUE);
+	popup = GetSubMenu(menu, 0);
+	CheckMenuItem(popup, IDM_CAPTURE_MINIMIZE, fMinimizeWinSpy ? MF_CHECKED : MF_UNCHECKED);
+	CheckMenuItem(popup, IDM_CAPTURE_HIDDEN, fShowHidden ? MF_CHECKED : MF_UNCHECKED);
+
+	command = TrackPopupMenu(popup, TPM_RETURNCMD | TPM_RIGHTBUTTON,
+		pt.x, pt.y, 0, hwnd, NULL);
+	DestroyMenu(menu);
+
+	switch(command)
+	{
+	case IDM_CAPTURE_DELAY_3:  StartDelayedCapture(hwnd, 3); break;
+	case IDM_CAPTURE_DELAY_5:  StartDelayedCapture(hwnd, 5); break;
+	case IDM_CAPTURE_DELAY_10: StartDelayedCapture(hwnd, 10); break;
+	case IDM_CAPTURE_HOTKEY:   StartHotkeyCapture(hwnd); break;
+	case IDM_WINSPY_OPTIONS:   ShowOptionsDlg(hwnd); break;
+	case IDM_CAPTURE_MINIMIZE: fMinimizeWinSpy = !fMinimizeWinSpy; break;
+	case IDM_CAPTURE_HIDDEN:   fShowHidden = !fShowHidden; break;
+	}
+}
+
+static BOOL CaptureWindowAtPointer(HWND hwndMain)
+{
+	POINT pt;
+	HWND hwnd;
+	DWORD thread, process;
+	int tab;
+
+	if(!GetCursorPos(&pt))
+		return FALSE;
+
+	hwnd = WindowFromPointEx(pt, fShowHidden);
+	if(!hwnd || GetAncestor(hwnd, GA_ROOTOWNER) == hwndMain)
+		return FALSE;
+
+	thread = GetWindowThreadProcessId(hwnd, &process);
+	if(!thread)
+		return FALSE;
+
+	ReadWindowInfo(hwnd);
+	snapshotWindow = hwnd;
+	snapshotThread = thread;
+	snapshotProcess = process;
+
+	// Read local class data during acquisition. The live Class tab can
+	// still use GetRemoteInfo on refresh to obtain private class details.
+	ZeroMemory(&spy_WndClassEx, sizeof(spy_WndClassEx));
+	spy_WndClassEx.style = GetClassLong(hwnd, GCL_STYLE);
+	spy_WndClassEx.cbClsExtra = GetClassLong(hwnd, GCL_CBCLSEXTRA);
+	spy_WndClassEx.cbWndExtra = GetClassLong(hwnd, GCL_CBWNDEXTRA);
+	spy_WndClassEx.hInstance = (HINSTANCE)GetClassLongPtr(hwnd, GCLP_HMODULE);
+	spy_szPassword[0] = 0;
+	spy_fPassword = FALSE;
+
+	// Sample every pane while the target still has focus. Later tab
+	// switches show these values even if the window has since closed.
+	CaptureGeneralInfo(hwnd);
+	for(tab = GENERAL_TAB + 1; tab < NUMTABCONTROLITEMS; tab++)
+		DisplayTabInfo(hwnd, tab);
+
+	return TRUE;
+}
+
+static void FinishPointerCapture(HWND hwnd)
+{
+	BOOL captured, live;
+	TCHAR caption[160];
+
+	StopPendingCapture(hwnd, FALSE);
+	captured = CaptureWindowAtPointer(hwnd);
+	live = captured && CanUseSelectedWindow();
+
+	if(captured && !live)
+		SetWindowText(hwnd, _T("WinSpy++ - Target closed during capture"));
+	else if(captured && fShowInCaption)
+	{
+		wsprintf(caption, _T("%s [%08X, %s]"), szAppName, snapshotWindow, spy_szClassName);
+		SetWindowText(hwnd, caption);
+	}
+	else
+		SetWindowText(hwnd, captured ? szAppName : capturePreviousCaption);
+
+	if(IsIconic(hwnd))
+		ShowWindow(hwnd, SW_RESTORE);
+
+	if(captured)
+	{
+		if(GetWindowLayout(hwnd) == WINSPY_MINIMIZED)
+			SetWindowLayout(hwnd, WINSPY_LASTMAX);
+		fFirstSelection = FALSE;
+		SetForegroundWindow(hwnd);
+	}
+	else
+		MessageBox(hwnd, _T("No target window was available under the cursor."), szAppName, MB_ICONWARNING);
+}
+
+static void UpdateDelayedCapture(HWND hwnd)
+{
+	ULONGLONG now;
+
+	if(!captureDeadline)
+		return;
+
+	now = GetTickCount64();
+	if(now >= captureDeadline)
+		FinishPointerCapture(hwnd);
+	else
+	{
+		UINT seconds = (UINT)((captureDeadline - now + 999) / 1000);
+		if(seconds != captureSeconds)
+			SetCountdownCaption(hwnd, seconds);
+	}
 }
 
 //
@@ -190,16 +530,13 @@ UINT CALLBACK WndFindProc(HWND hwndTool, UINT uCode, HWND hwnd)
 	TCHAR ach[90] = {0};
 	TCHAR szClass[70] = {0};
 
-	static BOOL fFirstDrag = TRUE;
 	static HWND hwndLastTarget;
 	static BOOL fOldShowHidden;
+	static TCHAR dragPreviousCaption[160];
 
 	switch(uCode)
 	{
 	case WFN_SELCHANGED:
-
-		spy_hCurWnd = hwnd;
-		spy_WndProc = 0;
 
 		if(fShowInCaption)
 		{
@@ -208,14 +545,23 @@ UINT CALLBACK WndFindProc(HWND hwndTool, UINT uCode, HWND hwnd)
 			SetWindowText(hwndMain, ach);
 		}
 
-		SetGeneralInfo(hwnd);
+		if(!snapshotWindow)
+		{
+			spy_hCurWnd = hwnd;
+			spy_WndProc = 0;
+		}
+		PreviewGeneralInfo(hwnd);
 		return 0;
 
 	case WFN_BEGIN:
 
+		StopPendingCapture(hwndMain, TRUE);
 		hwndLastTarget = spy_hCurWnd;
+		if(snapshotWindow)
+			GetWindowText(hwndMain, dragPreviousCaption, ARRAYSIZE(dragPreviousCaption));
 
-		spy_hCurWnd = hwnd;
+		if(!snapshotWindow)
+			spy_hCurWnd = hwnd;
 
 		if(fMinimizeWinSpy)
 		{
@@ -232,7 +578,7 @@ UINT CALLBACK WndFindProc(HWND hwndTool, UINT uCode, HWND hwnd)
 		// Restore the current window + Fall through!
 		spy_hCurWnd = hwndLastTarget;
 
-		if(fShowInCaption)
+		if(fShowInCaption && !snapshotWindow)
 		{
 			GetClassName(spy_hCurWnd, szClass, sizeof(szClass) / sizeof(TCHAR));
 
@@ -244,15 +590,21 @@ UINT CALLBACK WndFindProc(HWND hwndTool, UINT uCode, HWND hwnd)
 
 		ShowWindow(hwndMain, SW_SHOW);			
 	
-		if(fMinimizeWinSpy || fFirstDrag)
-		{
-			fFirstDrag = FALSE;
+		if(!snapshotWindow)
 			DisplayWindowInfo(spy_hCurWnd);
-			SetWindowLayout(hwndMain, WINSPY_LASTMAX);
-		}
+		else if(uCode == WFN_END && IsWindow(hwnd) &&
+			(hwnd != snapshotWindow || CanUseSelectedWindow()))
+			DisplayWindowInfo(hwnd);
 		else
 		{
-			DisplayWindowInfo(spy_hCurWnd);
+			SetWindowText(hwndMain, dragPreviousCaption);
+			RestoreCapturedGeneralInfo();
+		}
+
+		if(fMinimizeWinSpy || fFirstSelection)
+		{
+			fFirstSelection = FALSE;
+			SetWindowLayout(hwndMain, WINSPY_LASTMAX);
 		}
 		
 		if(fMinimizeWinSpy)
@@ -384,8 +736,7 @@ HWND CreateTooltip(HWND hwndDlg)
 	{
 		-1, IDC_DRAGGER,    _T("Window Finder Tool"),
 		-1, IDC_PIN_TOOLBAR,_T("Keep On-Screen (F4)"),
-		-1, IDC_MINIMIZE,   _T("Minimize On Use"),
-		-1, IDC_HIDDEN,		_T("Display Hidden Windows"),
+		-1, IDC_FINDER_MENU,_T("Capture options"),
 		-1, IDC_CAPTURE,    _T("Capture Current Window (Alt+C)"),
 		-1, IDOK,			_T("Exit WinSpy++"),
 		-1, IDC_EXPAND,     _T("Expand / Collapse (F3)"),
@@ -434,6 +785,8 @@ HWND CreateTooltip(HWND hwndDlg)
 		ti.uFlags   = TTF_SUBCLASS | TTF_IDISHWND;
 		ti.hwnd     = hwnd;
 		ti.uId      = (UINT_PTR)GetDlgItem(hwnd, CtrlTips[i].uCtrlId);
+		if(!ti.uId)
+			continue;
 		ti.hinst    = hInst;
 		ti.lpszText = CtrlTips[i].szText;
 		ti.lParam   = 0;
@@ -546,9 +899,19 @@ BOOL WinSpy_InitDlg(HWND hwnd)
 	int     i;
 	HICON   hIcon;
 	TCITEM  tcitem;
+	HWND    hwndFinder = GetDlgItem(hwnd, IDC_DRAGGER);
 	
 	// Initialize the finder tool
-	MakeFinderTool(GetDlgItem(hwnd, IDC_DRAGGER), WndFindProc);
+	MakeFinderTool(hwndFinder, WndFindProc);
+#ifdef WINSPY_FINDER_DROPDOWN
+	// Keep one dialog template so the resource editor can round-trip it.
+	SetWindowLong(hwndFinder, GWL_STYLE, GetWindowLong(hwndFinder, GWL_STYLE) | WS_TABSTOP);
+	SetWindowText(hwndFinder, _T("Finder and capture options"));
+	DestroyWindow(GetDlgItem(hwnd, IDC_FINDER_MENU));
+	ShowDlgItem(hwnd, IDC_FINDER_HINT2, SW_HIDE);
+#elif !defined(WINSPY_FINDER_TIMER)
+	InitFinderCog(GetDlgItem(hwnd, IDC_FINDER_MENU));
+#endif
 
 	// Make the More>> button into a bitmap
 	MakeDlgBitmapButton(hwnd, IDC_EXPAND, IDI_ICON16);
@@ -587,22 +950,11 @@ BOOL WinSpy_InitDlg(HWND hwnd)
 	
 	InitStockStyleLists();
 	
-	// 
-	CheckDlgButton(hwnd, IDC_MINIMIZE, fMinimizeWinSpy);
-	CheckDlgButton(hwnd, IDC_HIDDEN,   fShowHidden);
-		
 	// Position our contents, work out how big the various
 	// layouts are (depending on current system settings for border
 	// width, titlebar height etc).
 	WinSpyDlg_SizeContents(hwnd);
 
-	// Make sure we test for this FIRST, before we do ANY SetWindowPos'.
-	// Otherwise, we will get a WM_WINDOWPOSCHANGED, and set fAlwaysOnTop to 0!
-	if(fAlwaysOnTop)
-	{
-		SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_ZONLY);
-	}
-	
 	// See what the registry settings are, and setup accordingly
 	if(fSaveWinPos && ptPinPos.x != CW_USEDEFAULT && ptPinPos.y != CW_USEDEFAULT)
 	{
@@ -627,10 +979,10 @@ BOOL WinSpy_InitDlg(HWND hwnd)
 
 
 	// add items *before* the close item
-	InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED | MF_STRING, IDM_WINSPY_ABOUT,   _T("&About"));
-	InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED | MF_STRING, IDM_WINSPY_OPTIONS, _T("&Options...\tAlt+Enter"));
-	InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED | MF_STRING, IDM_WINSPY_HELP,    _T("&Help\tF1"));
-	InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_SEPARATOR,           -1,                 _T(""));
+	InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED | MF_STRING, IDM_WINSPY_ABOUT,   _T("&About..."));
+	//InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED | MF_STRING, IDM_WINSPY_OPTIONS, _T("&Options...\tAlt+Enter"));
+	//InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED | MF_STRING, IDM_WINSPY_HELP,    _T("&Help\tF1"));
+	//InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_SEPARATOR,           -1,                 _T(""));
 	InsertMenu(hSysMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED | MF_STRING	| 
 		(fAlwaysOnTop ? MF_CHECKED : 0), IDM_WINSPY_ONTOP,   		 
 		_T("Always On &Top\tShift+Y"));
@@ -771,10 +1123,9 @@ UINT WinSpyDlg_NotifyHandler(HWND hwnd, WPARAM wParam, NMHDR *hdr)
 			tvi.mask = TVIF_HANDLE | TVIF_PARAM;
 			tvi.hItem = nmtv->itemNew.hItem;
 			
-			// Get TVITEM structure
-			TreeView_GetItem(hdr->hwndFrom, &tvi);
-			
-			DisplayWindowInfo((HWND)tvi.lParam);
+			// Locating the captured window in the tree keeps its snapshot.
+			if(TreeView_GetItem(hdr->hwndFrom, &tvi) && (HWND)tvi.lParam != snapshotWindow)
+				DisplayWindowInfo((HWND)tvi.lParam);
 		}
 		
 		return TRUE;
@@ -843,6 +1194,8 @@ INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 
 	case WM_DESTROY:
+		StopPendingCapture(hwnd, FALSE);
+		ClearCapturedGeneralInfo();
 		DeInitGlobalWindowTree(GetDlgItem(hwnd, IDC_TREE1));
 		return TRUE;
 
@@ -854,6 +1207,22 @@ INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		
 	case WM_COMMAND:
 		return WinSpyDlg_CommandHandler(hwnd, wParam, lParam);
+
+	case WM_TIMER:
+		if(wParam == DELAYED_CAPTURE_TIMER)
+		{
+			UpdateDelayedCapture(hwnd);
+			return TRUE;
+		}
+		break;
+
+	case WM_HOTKEY:
+		if(wParam == CAPTURE_HOTKEY_ID && captureHotkeyArmed)
+		{
+			FinishPointerCapture(hwnd);
+			return TRUE;
+		}
+		break;
 
 	case WM_SIZE:
 		return WinSpyDlg_Size(hwnd, wParam, lParam);
@@ -877,6 +1246,13 @@ INT_PTR WINAPI DialogProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return WinSpyDlg_NotifyHandler(hwnd, wParam, (NMHDR *)lParam);
 
 	case WM_DRAWITEM:
+#ifndef WINSPY_FINDER_DROPDOWN
+		if(wParam == IDC_FINDER_MENU)
+		{
+			DrawFinderMenuButton((DRAWITEMSTRUCT *)lParam);
+			return TRUE;
+		}
+#endif
 		return DrawBitmapButton((DRAWITEMSTRUCT *)lParam);
 
 	// Update our layout based on new settings
@@ -922,6 +1298,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND	hwndMain;
 	HACCEL	hAccelTable;			
 	MSG		msg;
+	BOOL	fStartOnTop;
 
 	INITCOMMONCONTROLSEX ice;
 	hInst = hInstance;
@@ -942,6 +1319,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RegisterDialogClass(_T("WinSpyPane"));
 
 	LoadSettings();
+	// Initial layout changes can update fAlwaysOnTop before the dialog is shown.
+	fStartOnTop = fAlwaysOnTop;
 	
 	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN), 0, DialogProc);
 
@@ -958,7 +1337,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//  time we ran). Therefore we use SetWindowPos to display the dialog, as
 	//  Matrox don't seem to hook this in their display driver..
 	//
-	SetWindowPos(hwndMain, 0, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW);
+	SetWindowPos(hwndMain, fStartOnTop ? HWND_TOPMOST : HWND_TOP, 0, 0, 0, 0,
+		SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 	
 	while(GetMessage(&msg, NULL,0,0))
 	{

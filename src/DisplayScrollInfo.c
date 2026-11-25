@@ -23,7 +23,7 @@ void SetScrollbarInfo(HWND hwnd)
 	SCROLLINFO si;
 	DWORD  dwStyle;
 	int    bartype;
-	TCHAR  ach[256];
+	TCHAR  ach[256] = {0};
 	HWND   hwndDlg = WinSpyTab[PROPERTY_TAB].hwnd;
 
 	if(hwnd == 0) return;

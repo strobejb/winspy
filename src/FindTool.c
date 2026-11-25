@@ -281,6 +281,193 @@ static void SetFinderBitmap(HWND hwnd, LPCTSTR propName, HBITMAP *variants)
 	InvalidateRect(hwnd, NULL, FALSE);
 }
 
+#ifdef WINSPY_FINDER_DROPDOWN
+static BOOL dropdownHot, dropdownPressed;
+
+static BOOL HasFinderDropdown(HWND hwnd)
+{
+	return GetDlgItem(GetParent(hwnd), IDC_FINDER_HINT) != NULL;
+}
+
+static int FinderDropdownWidth(HWND hwnd)
+{
+	return DpiScale(hwnd, 15);
+}
+
+static RECT FinderDropdownBounds(HWND hwnd)
+{
+	RECT rect;
+	GetClientRect(hwnd, &rect);
+	rect.left = rect.right - FinderDropdownWidth(hwnd);
+	return rect;
+}
+
+static void SetFinderDropdownHot(HWND hwnd, BOOL hot)
+{
+	if(hot == dropdownHot)
+		return;
+
+	dropdownHot = hot;
+	if(hot)
+	{
+		TRACKMOUSEEVENT track = { sizeof(track), TME_LEAVE, hwnd };
+		TrackMouseEvent(&track);
+	}
+	InvalidateRect(hwnd, NULL, FALSE);
+}
+
+static void OpenFinderDropdown(HWND hwnd)
+{
+	RECT rect = FinderDropdownBounds(hwnd);
+	POINT pt = { rect.left, rect.bottom };
+	ClientToScreen(hwnd, &pt);
+	WinSpy_ShowFinderMenu(GetParent(hwnd), pt);
+}
+
+static void DrawExtendedFinder(HWND hwnd, HDC hdc, HDC source, const BITMAP *bm, BLENDFUNCTION blend)
+{
+	int rightFrame = DpiScale(hwnd, 3);
+	int edge = bm->bmWidth - rightFrame;
+	int extension = FinderDropdownWidth(hwnd);
+	int top = MulDiv(bm->bmHeight, 6, 28);
+	int bottom = bm->bmHeight - DpiScale(hwnd, 3);
+	int cx = bm->bmWidth + (extension - rightFrame) / 2;
+	int cy = (top + bottom) / 2;
+	int half = DpiScale(hwnd, 4);
+	RECT body = { bm->bmWidth + 1, top, bm->bmWidth + extension - rightFrame, bottom };
+	POINT arrow[] = { {cx - half, cy - half / 2}, {cx + half, cy - half / 2}, {cx, cy + half / 2} };
+	HGDIOBJ oldPen, oldBrush;
+	COLORREF fill = RGB(232, 238, 245);
+
+	// Keep the original pixels around the crosshair. Move the rounded
+	// right edge out and continue the blue title bar with a column of pixels.
+	AlphaBlend(hdc, 0, 0, edge, bm->bmHeight, source, 0, 0, edge, bm->bmHeight, blend);
+	AlphaBlend(hdc, edge, 0, extension, bm->bmHeight, source, edge - 1, 0, 1, bm->bmHeight, blend);
+	AlphaBlend(hdc, edge + extension, 0, rightFrame, bm->bmHeight,
+		source, edge, 0, rightFrame, bm->bmHeight, blend);
+
+	if(dropdownHot)
+		fill = dropdownPressed ? RGB(181, 207, 240) : RGB(204, 223, 247);
+	SetDCBrushColor(hdc, fill);
+	FillRect(hdc, &body, GetStockObject(DC_BRUSH));
+
+	oldPen = SelectObject(hdc, GetStockObject(DC_PEN));
+	SetDCPenColor(hdc, RGB(151, 177, 213));
+	MoveToEx(hdc, bm->bmWidth, top, NULL);
+	LineTo(hdc, bm->bmWidth, bottom);
+
+	SelectObject(hdc, GetStockObject(NULL_PEN));
+	oldBrush = SelectObject(hdc, GetStockObject(DC_BRUSH));
+	SetDCBrushColor(hdc, RGB(35, 53, 75));
+	Polygon(hdc, arrow, ARRAYSIZE(arrow));
+	SelectObject(hdc, oldPen);
+	SelectObject(hdc, oldBrush);
+
+	if(GetFocus() == hwnd && !(SendMessage(hwnd, WM_QUERYUISTATE, 0, 0) & UISF_HIDEFOCUS))
+	{
+		InflateRect(&body, -DpiScale(hwnd, 1), -DpiScale(hwnd, 2));
+		DrawFocusRect(hdc, &body);
+	}
+}
+#endif
+
+static void LayoutFinderMenu(HWND hwndFinder)
+{
+	HWND hwndDlg = GetParent(hwndFinder);
+	HWND hwndHint = GetDlgItem(hwndDlg, IDC_FINDER_HINT);
+	HBITMAP hbm = (HBITMAP)GetProp(hwndFinder, PROP_CURRENT_BITMAP);
+	BITMAP bm;
+	RECT rect, hint;
+	int finderWidth;
+#ifndef WINSPY_FINDER_DROPDOWN
+	HWND hwndMenu = GetDlgItem(hwndDlg, IDC_FINDER_MENU);
+	RECT menu;
+#endif
+
+	if(!hwndHint || !GetObject(hbm, sizeof(bm), &bm))
+		return;
+
+	GetWindowRect(hwndFinder, &rect);
+	MapWindowPoints(NULL, hwndDlg, (POINT *)&rect, 2);
+	finderWidth = bm.bmWidth;
+#ifdef WINSPY_FINDER_DROPDOWN
+	finderWidth += FinderDropdownWidth(hwndFinder);
+#else
+	GetWindowRect(hwndMenu, &menu);
+	MapWindowPoints(NULL, hwndDlg, (POINT *)&menu, 2);
+	SetWindowPos(hwndMenu, NULL, menu.left, rect.top, menu.right - menu.left, bm.bmHeight,
+		SWP_NOZORDER | SWP_NOACTIVATE);
+#endif
+	SetWindowPos(hwndFinder, NULL, 0, 0, finderWidth, bm.bmHeight, SWP_SIZEONLY);
+
+	GetWindowRect(hwndHint, &hint);
+	MapWindowPoints(NULL, hwndDlg, (POINT *)&hint, 2);
+	SetWindowPos(hwndHint, NULL, rect.left + finderWidth + DpiScale(hwndFinder, 8), hint.top,
+		0, 0, SWP_MOVEONLY);
+}
+
+#ifndef WINSPY_FINDER_DROPDOWN
+void DrawFinderMenuButton(const DRAWITEMSTRUCT *draw)
+{
+	HWND hwnd = draw->hwndItem;
+	HDC hdc = draw->hDC;
+	RECT rc = draw->rcItem;
+
+	if(!fThemeApiAvailable || FAILED(DrawThemeParentBackground(hwnd, hdc, &rc)))
+		FillRect(hdc, &rc, GetSysColorBrush(COLOR_BTNFACE));
+
+#ifdef WINSPY_FINDER_TIMER
+	{
+		int offset = (draw->itemState & ODS_SELECTED) != 0;
+		int cx = (rc.left + rc.right) / 2 + offset;
+		int cy = (rc.top + rc.bottom) / 2 + offset;
+		int radius = DpiScale(hwnd, 7);
+		int stroke = DpiScale(hwnd, 2);
+		int clockX = cx - DpiScale(hwnd, 5);
+		int arrowX = cx + DpiScale(hwnd, 8);
+		POINT arrow[] = {
+			{arrowX - stroke, cy - 1}, {arrowX + stroke, cy - 1}, {arrowX, cy + stroke}
+		};
+		HPEN pen = CreatePen(PS_SOLID, stroke, GetSysColor(COLOR_BTNTEXT));
+
+		HGDIOBJ oldPen = SelectObject(hdc, pen);
+		HGDIOBJ oldBrush = SelectObject(hdc, GetStockObject(HOLLOW_BRUSH));
+		Ellipse(hdc, clockX - radius, cy - radius, clockX + radius + 1, cy + radius + 1);
+		MoveToEx(hdc, clockX, cy - radius, NULL);
+		LineTo(hdc, clockX, cy - radius - stroke * 2);
+		MoveToEx(hdc, clockX - stroke, cy - radius - stroke * 2, NULL);
+		LineTo(hdc, clockX + stroke + 1, cy - radius - stroke * 2);
+		MoveToEx(hdc, clockX, cy - stroke * 2, NULL);
+		LineTo(hdc, clockX, cy);
+		LineTo(hdc, clockX + stroke * 2, cy);
+		SelectObject(hdc, GetStockObject(NULL_PEN));
+		SelectObject(hdc, GetSysColorBrush(COLOR_BTNTEXT));
+		Polygon(hdc, arrow, ARRAYSIZE(arrow));
+		SelectObject(hdc, oldPen);
+		SelectObject(hdc, oldBrush);
+		DeleteObject(pen);
+	}
+#else
+	DrawFinderCog(draw);
+#endif
+
+	if((draw->itemState & (ODS_FOCUS | ODS_NOFOCUSRECT)) == ODS_FOCUS)
+	{
+		InflateRect(&rc, -DpiScale(hwnd, 3), -DpiScale(hwnd, 3));
+		DrawFocusRect(hdc, &rc);
+	}
+}
+#endif
+static void ClearScaledFinderBitmaps(HWND hwnd)
+{
+	HBITMAP hbm1 = (HBITMAP)RemoveProp(hwnd, PROP_DRAG1_SCALED);
+	HBITMAP hbm2 = (HBITMAP)RemoveProp(hwnd, PROP_DRAG2_SCALED);
+
+	RemoveProp(hwnd, PROP_CURRENT_BITMAP);
+	if(hbm1) DeleteObject(hbm1);
+	if(hbm2) DeleteObject(hbm2);
+}
+
 void FreeFinderResources()
 {
 	int i;
@@ -470,6 +657,22 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		ptLast.x = (short)LOWORD(lParam);
 		ptLast.y = (short)HIWORD(lParam);
 
+#ifdef WINSPY_FINDER_DROPDOWN
+		if(HasFinderDropdown(hwnd))
+		{
+			RECT dropdown = FinderDropdownBounds(hwnd);
+			if(PtInRect(&dropdown, ptLast))
+			{
+				SetFocus(hwnd);
+				SetFinderDropdownHot(hwnd, TRUE);
+				dropdownPressed = TRUE;
+				SetCapture(hwnd);
+				InvalidateRect(hwnd, &dropdown, FALSE);
+				return 0;
+			}
+			SetFinderDropdownHot(hwnd, FALSE);
+		}
+#endif
 		// Ask the callback function if we want to proceed
 		if(FireWndFindNotify(hwnd, WFN_BEGIN, 0) == -1)
 		{
@@ -506,6 +709,14 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		pt.x = (short)LOWORD(lParam);
 		pt.y = (short)HIWORD(lParam);
 
+#ifdef WINSPY_FINDER_DROPDOWN
+		if(!fDragging && HasFinderDropdown(hwnd))
+		{
+			RECT dropdown = FinderDropdownBounds(hwnd);
+			SetFinderDropdownHot(hwnd, PtInRect(&dropdown, pt));
+			return 0;
+		}
+#endif
 		if(fDragging == TRUE && ptLast.x != pt.x && ptLast.y != pt.y)
 		{
 			//MoveFindTool(hwnd, wParam, lParam);
@@ -536,6 +747,20 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_LBUTTONUP:
 
+#ifdef WINSPY_FINDER_DROPDOWN
+		if(dropdownPressed && HasFinderDropdown(hwnd))
+		{
+			RECT dropdown = FinderDropdownBounds(hwnd);
+			POINT click = { (short)LOWORD(lParam), (short)HIWORD(lParam) };
+			dropdownPressed = FALSE;
+			ReleaseCapture();
+			SetFinderDropdownHot(hwnd, FALSE);
+			InvalidateRect(hwnd, &dropdown, FALSE);
+			if(PtInRect(&dropdown, click))
+				OpenFinderDropdown(hwnd);
+			return 0;
+		}
+#endif
 		// Mouse has been release, so end the find-tool
 		if(fDragging == TRUE)
 		{
@@ -550,6 +775,10 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	// Sent from the keyboard hook
 	case WM_CANCELMODE:
 		
+#ifdef WINSPY_FINDER_DROPDOWN
+		if(dropdownPressed && HasFinderDropdown(hwnd))
+			ReleaseCapture();
+#endif
 		// User has pressed ESCAPE, so cancel the find-tool
 		if(fDragging == TRUE)
 		{
@@ -560,6 +789,42 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 
 		return 0;
+
+#ifdef WINSPY_FINDER_DROPDOWN
+	case WM_CAPTURECHANGED:
+		if(dropdownPressed && HasFinderDropdown(hwnd))
+		{
+			dropdownPressed = FALSE;
+			InvalidateRect(hwnd, NULL, FALSE);
+		}
+		break;
+
+	case WM_MOUSELEAVE:
+		if(HasFinderDropdown(hwnd))
+			SetFinderDropdownHot(hwnd, FALSE);
+		break;
+
+	case WM_GETDLGCODE:
+		if(HasFinderDropdown(hwnd) && (wParam == VK_SPACE || wParam == VK_RETURN))
+			return DLGC_WANTMESSAGE;
+		break;
+
+	case WM_KEYDOWN:
+		if(HasFinderDropdown(hwnd) && !fDragging &&
+			(wParam == VK_SPACE || wParam == VK_RETURN) && !(lParam & 0x40000000))
+		{
+			OpenFinderDropdown(hwnd);
+			return 0;
+		}
+		break;
+
+	case WM_SETFOCUS:
+	case WM_KILLFOCUS:
+	case WM_UPDATEUISTATE:
+		if(HasFinderDropdown(hwnd))
+			InvalidateRect(hwnd, NULL, FALSE);
+		break;
+#endif
 
 	case WM_ERASEBKGND:
 
@@ -591,6 +856,11 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			BLENDFUNCTION bf = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 
 			GetObject(hbmCur, sizeof(bm), &bm);
+#ifdef WINSPY_FINDER_DROPDOWN
+			if(HasFinderDropdown(hwnd))
+				DrawExtendedFinder(hwnd, hdc, hdcMem, &bm, bf);
+			else
+#endif
 			AlphaBlend(hdc, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, bf);
 
 			SelectObject(hdcMem, hbmOld);
@@ -601,15 +871,17 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	}
 
+	case WM_DPICHANGED_AFTERPARENT:
+		ClearScaledFinderBitmaps(hwnd);
+		if(fDragging && draghookhwnd == hwnd)
+			SetFinderBitmap(hwnd, PROP_DRAG2_SCALED, hBitmapDrag2);
+		else
+			SetFinderBitmap(hwnd, PROP_DRAG1_SCALED, hBitmapDrag1);
+		LayoutFinderMenu(hwnd);
+		break;
+
 	case WM_NCDESTROY:
-	{
-		// Free this control's cached DPI-scaled bitmaps, if any
-		HBITMAP hbm1 = (HBITMAP)RemoveProp(hwnd, PROP_DRAG1_SCALED);
-		HBITMAP hbm2 = (HBITMAP)RemoveProp(hwnd, PROP_DRAG2_SCALED);
-
-		if(hbm1) DeleteObject(hbm1);
-		if(hbm2) DeleteObject(hbm2);
-
+		ClearScaledFinderBitmaps(hwnd);
 		// When the last finder tool has been destroyed, free
 		// up all the resources
 		if(InterlockedDecrement(&lRefCount) == 0)
@@ -618,7 +890,6 @@ LRESULT CALLBACK StaticProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 
 		break;
-	}
 	}
 
 	return CallWindowProc(oldstaticproc, hwnd, msg, wParam, lParam);
@@ -659,6 +930,7 @@ BOOL MakeFinderTool(HWND hwnd, WNDFINDPROC wfp)
 	
 	// Subclass the static control
 	oldstaticproc = (WNDPROC)SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)StaticProc);
+	LayoutFinderMenu(hwnd);
 
 	return TRUE;
 }

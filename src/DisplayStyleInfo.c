@@ -923,7 +923,7 @@ DWORD EnumStyles(StyleLookupEx *StyleList, HWND hwndList, DWORD dwStyle, BOOL fA
 //
 void FillStyleLists(HWND hwndTarget, HWND hwndStyleList, HWND hwndExStyleList, BOOL fAllStyles, BOOL fExtControl)
 {
-	TCHAR szClassName[256];
+	TCHAR szClassName[256] = {0};
 	DWORD dwStyle;
 	DWORD dwStyleEx;
 	DWORD dwMessage;
@@ -996,8 +996,12 @@ void FillStyleLists(HWND hwndTarget, HWND hwndStyleList, HWND hwndExStyleList, B
 			// Add them if required
 			if(StyleList != 0)
 			{
-				dwStyleEx = (DWORD)SendMessage(hwndTarget, dwMessage, 0, 0);
-				EnumStyles(StyleList, hwndExStyleList, dwStyleEx, fAllStyles);
+				DWORD_PTR result;
+				if(SendMessageTimeout(hwndTarget, dwMessage, 0, 0,
+					SMTO_BLOCK | SMTO_ABORTIFHUNG | SMTO_ERRORONEXIT, 100, &result))
+				{
+					EnumStyles(StyleList, hwndExStyleList, (DWORD)result, fAllStyles);
+				}
 			}
 		}
 	}

@@ -51,6 +51,9 @@
     <ClCompile Include="FindToolTrans.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FinderCog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="FunkyList.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -170,6 +173,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resource\icon7.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resource\settingscog.ico">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="resource\selbox.png">

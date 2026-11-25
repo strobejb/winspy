@@ -154,10 +154,10 @@ BOOL GetProcessNameByPid(DWORD dwProcessId, TCHAR szName[], DWORD nNameSize, TCH
 //
 void SetProcessInfo(HWND hwnd)
 {
-	DWORD dwProcessId;
+	DWORD dwProcessId = 0;
 	DWORD dwThreadId;
 	TCHAR ach[32];
-	TCHAR szPath[MAX_PATH];
+	TCHAR szPath[MAX_PATH] = {0};
 
 	HWND  hwndDlg = WinSpyTab[PROCESS_TAB].hwnd; 
 
@@ -170,9 +170,10 @@ void SetProcessInfo(HWND hwnd)
 	// Thread Id
 	wsprintf(ach, _T("%08X  (%u)"), dwThreadId, dwThreadId);
 	SetDlgItemText(hwndDlg, IDC_TID, ach);
+	ach[0] = 0;
 
 	// Try to get process name and path
-	if(GetProcessNameByPid(dwProcessId, ach,    sizeof(ach)    / sizeof(TCHAR),
+	if(dwThreadId && GetProcessNameByPid(dwProcessId, ach,    sizeof(ach)    / sizeof(TCHAR),
 										szPath, sizeof(szPath) / sizeof(TCHAR)))
 	{
 		SetDlgItemText(hwndDlg, IDC_PROCESSNAME, ach);
@@ -181,7 +182,7 @@ void SetProcessInfo(HWND hwnd)
 	else
 	{
 		SetDlgItemText(hwndDlg, IDC_PROCESSNAME, _T("N/A"));
-		SetDlgItemText(hwndDlg, IDC_PROCESSNAME, _T("N/A"));
+		SetDlgItemText(hwndDlg, IDC_PROCESSPATH, _T("N/A"));
 	}
 
 

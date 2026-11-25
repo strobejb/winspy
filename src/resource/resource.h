@@ -3,6 +3,7 @@
 // Used by WinSpy.rc
 //
 #define IDD_TAB_GENERAL                 101
+#define IDB_DRAGTOOL1_100               103
 #define IDC_CURSOR1                     104
 #define IDI_ICON1                       105
 #define IDD_TAB_STYLES                  106
@@ -13,6 +14,7 @@
 #define IDD_MAIN                        111
 #define IDB_BITMAP2                     113
 #define IDB_WINDOW_INVISIBLE            113
+#define IDB_DRAGTOOL2_100               116
 #define IDB_BITMAP3                     117
 #define IDB_WINDOW_VISIBLE              117
 #define IDD_STYLE_EDIT                  118
@@ -35,30 +37,30 @@
 #define IDR_RT_MANIFEST1                159
 #define IDB_PNG1                        162
 #define IDB_SELBOX                      162
-#define IDB_DRAGTOOL1_100               103
 #define IDB_DRAGTOOL1_125               163
 #define IDB_DRAGTOOL1_150               164
-#define IDB_DRAGTOOL1_175               169
 #define IDB_DRAGTOOL1_200               165
-#define IDB_DRAGTOOL1_225               170
-#define IDB_DRAGTOOL1_250               171
-#define IDB_DRAGTOOL2_100               116
 #define IDB_DRAGTOOL2_125               166
 #define IDB_DRAGTOOL2_150               167
-#define IDB_DRAGTOOL2_175               172
 #define IDB_DRAGTOOL2_200               168
+#define IDB_DRAGTOOL1_175               169
+#define IDB_DRAGTOOL1_225               170
+#define IDB_DRAGTOOL1_250               171
+#define IDB_DRAGTOOL2_175               172
 #define IDB_DRAGTOOL2_225               173
 #define IDB_DRAGTOOL2_250               174
 #define IDI_ICON_SYSMENU                175
+#define IDR_FINDER_MENU                 176
+#define IDI_FINDER_COG                  177
+#define IDD_CAPTURE_HOTKEY              178
 #define IDC_LIST1                       1000
 #define IDC_DRAGGER                     1001
 #define IDC_LIST2                       1001
 #define IDC_HANDLE                      1002
 #define IDC_CAPTION2                    1003
 #define IDC_WINDOWBYTES                 1004
-#define IDC_MINIMIZE                    1005
+#define IDC_FINDER_MENU                 1005
 #define IDC_CLASS                       1006
-#define IDC_HIDDEN                      1006
 #define IDC_STYLE                       1007
 #define IDC_RECTANGLE                   1008
 #define IDC_CLIENTRECT                  1010
@@ -144,6 +146,11 @@
 #define IDC_EXPAND                      1070
 #define IDC_WINDOWPROC                  1070
 #define IDC_CLEAR                       1071
+#define IDC_FINDER_HINT                 1072
+#define IDC_FINDER_HINT2                1073
+#define IDC_SPIN1                       1074
+#define IDC_CAPTURE_HOTKEY              1075
+#define IDC_CAPTURE_HOTKEY_PROMPT       1076
 #define IDM_GENERAL_ONTOP               40003
 #define IDM_GENERAL_VISIBLE             40004
 #define IDM_GENERAL_ENABLED             40005
@@ -184,15 +191,21 @@
 #define IDM_POPUP_COPY                  40041
 #define IDM_POPUP_SAVE                  40042
 #define IDM_POPUP_DESTROY               40043
+#define IDM_CAPTURE_DELAY_3             40044
+#define IDM_CAPTURE_DELAY_5             40045
+#define IDM_CAPTURE_DELAY_10            40046
+#define IDM_CAPTURE_MINIMIZE            40047
+#define IDM_CAPTURE_HIDDEN              40048
+#define IDM_CAPTURE_HOTKEY              40049
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        176
-#define _APS_NEXT_COMMAND_VALUE         40044
-#define _APS_NEXT_CONTROL_VALUE         1071
+#define _APS_NEXT_RESOURCE_VALUE        179
+#define _APS_NEXT_COMMAND_VALUE         40050
+#define _APS_NEXT_CONTROL_VALUE         1077
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

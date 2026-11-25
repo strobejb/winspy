@@ -235,7 +235,7 @@ int FormatStyle(TCHAR *ach, StyleLookupType *stylelist, int items, UINT matchthi
 //
 void SetClassInfo(HWND hwnd)
 {
-	TCHAR ach[256];
+	TCHAR ach[256] = {0};
 
 	int i, numstyles, classbytes;
 	HWND hwndDlg = WinSpyTab[CLASS_TAB].hwnd;

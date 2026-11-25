@@ -3,6 +3,7 @@
 //
 // Version
 //
+#include "winres.h"
 #include "version.h"
 
 #define STRINGIZE_(s) #s

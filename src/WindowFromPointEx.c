@@ -18,10 +18,13 @@
 #include <windows.h>
 #include <tchar.h>
 
-static HWND  hwndGlobal;
-static HWND  hwndButton;
-static BOOL  g_fShowHidden;
-static DWORD dwArea;
+typedef struct
+{
+	POINT pt;
+	BOOL showHidden;
+	HWND best;
+	ULONGLONG area;
+} ChildSearch;
 
 //
 //	Callback function used with FindBestChild
@@ -29,26 +32,19 @@ static DWORD dwArea;
 static BOOL CALLBACK FindBestChildProc(HWND hwnd, LPARAM lParam)
 {
 	RECT  rect;
-	DWORD a;
-	POINT pt;
+	ChildSearch *search = (ChildSearch *)lParam;
 
-	pt.x = (short)LOWORD(lParam);
-	pt.y = (short)HIWORD(lParam);
-
-	GetWindowRect(hwnd, &rect);
-
-	// Is the mouse inside this child window?
-	if(PtInRect(&rect, pt))
+	if(GetWindowRect(hwnd, &rect) && PtInRect(&rect, search->pt) &&
+		(search->showHidden || IsWindowVisible(hwnd)))
 	{
-		// work out area of child window
-		a = (rect.right-rect.left) * (rect.bottom-rect.top);
+		ULONGLONG area = (ULONGLONG)(rect.right - rect.left) * (rect.bottom - rect.top);
 	
 		// if this child window is smaller than the
 		// current "best", then choose this one
-		if(a < dwArea && (IsWindowVisible(hwnd) || g_fShowHidden == TRUE))
+		if(area < search->area)
 		{
-			dwArea = a;
-			hwndGlobal = hwnd;
+			search->area = area;
+			search->best = hwnd;
 		}
 	}
 
@@ -85,16 +81,11 @@ static BOOL CALLBACK FindBestChildProc(HWND hwnd, LPARAM lParam)
 //	pt        - coordinates of mouse, in screen coords
 //				(i.e. same coords used with WindowFromPoint)
 //
-static HWND FindBestChild(HWND hwndFound, POINT pt)
+static HWND FindBestChild(HWND hwndFound, POINT pt, BOOL fShowHidden)
 {
-	HWND  hwnd;
+	HWND hwnd = GetParent(hwndFound);
 	DWORD dwStyle;
-
-	dwArea = -1;	// Start off again
-
-	hwndGlobal = 0;
-
-	hwnd = GetParent(hwndFound);
+	ChildSearch search = { pt, fShowHidden, NULL, (ULONGLONG)-1 };
 	
 	dwStyle = GetWindowLong(hwndFound, GWL_STYLE);
 
@@ -112,12 +103,10 @@ static HWND FindBestChild(HWND hwndFound, POINT pt)
 	//  fShowHidden = TRUE
 	//  ...experiment!!
 	//
-	EnumChildWindows(hwnd, FindBestChildProc, MAKELPARAM(pt.x, pt.y));
+	if(IsWindow(hwnd))
+		EnumChildWindows(hwnd, FindBestChildProc, (LPARAM)&search);
 
-	if(hwndGlobal == 0)
-		hwndGlobal = hwnd;
-
-	return hwndGlobal;
+	return IsWindow(search.best) ? search.best : hwnd;
 }
 
 //
@@ -127,8 +116,6 @@ HWND WindowFromPointEx(POINT pt, BOOL fShowHidden)
 {
 	HWND hWndPoint;
 	
-	g_fShowHidden = fShowHidden;
-
 	//
 	// First of all find the parent window under the mouse
 	// We are working in SCREEN coordinates	
@@ -140,15 +127,15 @@ HWND WindowFromPointEx(POINT pt, BOOL fShowHidden)
 
 	// WindowFromPoint is not too accurate. There is quite likely
 	// another window under the mouse.
-	hWndPoint = FindBestChild(hWndPoint, pt);
+	hWndPoint = FindBestChild(hWndPoint, pt, fShowHidden);
 	
 	//if we don't allow hidden windows, then return the parent
-	if(!g_fShowHidden)
+	if(!fShowHidden)
 	{
 		while(hWndPoint && !IsWindowVisible(hWndPoint))
 			hWndPoint = GetParent(hWndPoint);
 	}
 
-	return hWndPoint;
+	return IsWindow(hWndPoint) ? hWndPoint : NULL;
 }
 

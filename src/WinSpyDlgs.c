@@ -269,6 +269,7 @@ LRESULT CALLBACK GeneralDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
 		{
 		// added in 1.6: windowproc URL control
 		case IDC_WINDOWPROC: 
+			if(!CanUseSelectedWindow()) return TRUE;
 			//RemoveHyperlink(hwnd, IDC_WINDOWPROC);
 			//InvalidateRect(GetDlgItem(hwnd, IDC_WINDOWPROC), 0, 0);
 			ShowDlgItem(hwnd, IDC_WINDOWPROC, SW_HIDE);
@@ -280,12 +281,14 @@ LRESULT CALLBACK GeneralDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
 		case IDC_EDITSIZE:
 
 			// Display the edit-size dialog
-			ShowEditSizeDlg(hwnd, spy_hCurWnd);
+			if(CanUseSelectedWindow())
+				ShowEditSizeDlg(hwnd, spy_hCurWnd);
 			return TRUE;
 
 		case IDC_HANDLE_MENU:
 
 			// Show our popup menu under this button
+			if(!CanUseSelectedWindow()) return TRUE;
 			hCtrl = spy_hCurWnd;
 
 			hMenu = LoadMenu(hInst, MAKEINTRESOURCE(IDR_MENU2));
@@ -298,8 +301,11 @@ LRESULT CALLBACK GeneralDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
 			uCmd = TrackPopupMenu(hPopup, TPM_RIGHTALIGN | TPM_TOPALIGN | TPM_RETURNCMD, 
 				rect.right, rect.bottom, 0, hwnd, 0);
 
-			WinSpy_PopupCommandHandler(hwnd, uCmd, hCtrl);
-			SetGeneralInfo(hCtrl);
+			if(uCmd && hCtrl == spy_hCurWnd && CanUseSelectedWindow())
+			{
+				WinSpy_PopupCommandHandler(hwnd, uCmd, hCtrl);
+				SetGeneralInfo(hCtrl);
+			}
 
 			DestroyMenu(hMenu);
 
@@ -308,6 +314,7 @@ LRESULT CALLBACK GeneralDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
 		case IDC_SETCAPTION:
 
 			// Set the target's window caption to the contents of the edit box
+			if(!CanUseSelectedWindow()) return TRUE;
 			hwndEdit1 = GetDlgItem(hwnd, IDC_CAPTION1);
 			hwndEdit2 = GetDlgItem(hwnd, IDC_CAPTION2);
 
@@ -391,11 +398,13 @@ LRESULT CALLBACK StyleDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam
 		switch(LOWORD(wParam))
 		{
 		case IDC_EDITSTYLE:
-			ShowWindowStyleEditor(hwnd, spy_hCurWnd, FALSE);
+			if(CanUseSelectedWindow())
+				ShowWindowStyleEditor(hwnd, spy_hCurWnd, FALSE);
 			return TRUE;
 
 		case IDC_EDITSTYLEEX:
-			ShowWindowStyleEditor(hwnd, spy_hCurWnd, TRUE);
+			if(CanUseSelectedWindow())
+				ShowWindowStyleEditor(hwnd, spy_hCurWnd, TRUE);
 			return TRUE;
 
 		default:
@@ -589,6 +598,7 @@ LRESULT CALLBACK ProcessDlgProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPar
 		switch(LOWORD(wParam))
 		{
 		case IDC_PROCESS_MENU:
+			if(!CanUseSelectedWindow()) return TRUE;
 
 			// Load the menu
 			dwThreadId = GetWindowThreadProcessId(spy_hCurWnd, &dwProcessId);

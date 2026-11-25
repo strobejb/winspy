@@ -11,6 +11,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
+#include <shellapi.h>
 #include <tchar.h>
 
 #include "resource.h"
@@ -21,25 +22,12 @@
 
 HTREEITEM FindTreeItemByHwnd(HWND hwndTree, HWND hwndTarget, HTREEITEM hItem);
 
-void ShowHelp(HWND hwndMain, UINT uCommand, DWORD dwData)
+static void ShowHelp(HWND hwndMain)
 {
-	TCHAR szPath[MAX_PATH];
-	TCHAR *ptr;
+	static const TCHAR projectPage[] = _T("https://www.catch22.net/projects/winspy/");
 
-	// Assume help file is in same directory as the
-	// main executable. So, just replace WinSpy.exe with WinSpy.hlp
-	// to find the name!
-
-	GetModuleFileName(0, szPath, MAX_PATH);
-
-	ptr = szPath + lstrlen(szPath) - 1;
-
-	while(ptr > szPath && *ptr != _T('\\'))
-		ptr--;
-
-	lstrcpy(ptr, _T("\\WinSpy.hlp"));
-
-	WinHelp(hwndMain, szPath, uCommand, dwData);
+	if((INT_PTR)ShellExecute(hwndMain, _T("open"), projectPage, NULL, NULL, SW_SHOWNORMAL) <= 32)
+		MessageBox(hwndMain, projectPage, _T("Could not open the WinSpy project page"), MB_OK | MB_ICONWARNING);
 }
 
 void SetPinState(BOOL fPinned)
@@ -123,7 +111,7 @@ UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 
 	case IDM_WINSPY_HELP:
-		ShowHelp(hwnd, HELP_CONTENTS, 0);
+		ShowHelp(hwnd);
 		return TRUE;
 
 	case IDM_WINSPY_OPTIONS:
@@ -147,12 +135,16 @@ UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		GetPinnedPosition(hwnd, &ptPinPos);
 		return TRUE;
 
-	case IDC_HIDDEN:
-		fShowHidden = IsDlgButtonChecked(hwnd, IDC_HIDDEN);
-		return TRUE;
-		
-	case IDC_MINIMIZE:
-		fMinimizeWinSpy = IsDlgButtonChecked(hwnd, IDC_MINIMIZE);
+	case IDC_FINDER_MENU:
+		if(HIWORD(wParam) == BN_CLICKED)
+		{
+			RECT rect;
+			if(GetWindowRect((HWND)lParam, &rect))
+			{
+				POINT pt = { rect.left, rect.bottom };
+				WinSpy_ShowFinderMenu(hwnd, pt);
+			}
+		}
 		return TRUE;
 		
 	case IDM_WINSPY_GENERAL:
@@ -204,6 +196,8 @@ UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 		
 	case IDC_CAPTURE:
+		if(!CanUseSelectedWindow())
+			return TRUE;
 		CaptureWindow(hwnd, spy_hCurWnd);
 		MessageBox(hwnd, _T("Window contents captured to clipboard"), szAppName, MB_ICONINFORMATION);
 		return TRUE;
@@ -241,6 +235,8 @@ UINT WinSpyDlg_CommandHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		return TRUE;
 		
 	case IDC_LOCATE:
+		if(!CanUseSelectedWindow())
+			return TRUE;
 		
 		hwndTree = GetDlgItem(hwnd, IDC_TREE1);
 			
@@ -291,7 +287,7 @@ UINT WinSpyDlg_SysMenuHandler(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	switch(wParam)
 	{
 	case IDM_WINSPY_HELP:
-		ShowHelp(hwnd, HELP_CONTENTS, 0);
+		ShowHelp(hwnd);
 		return TRUE;
 
 	case IDM_WINSPY_ABOUT:

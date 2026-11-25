@@ -20,8 +20,8 @@
 static BOOL CALLBACK ChildWindowProc(HWND hwnd, LPARAM lParam)
 {
 	TCHAR  ach[256];
-	TCHAR  cname[256];
-	TCHAR  wname[256];
+	TCHAR  cname[256] = {0};
+	TCHAR  wname[256] = {0};
 	LVITEM lvitem;
 	
 	//only display 1st generation (1-deep) children - 
@@ -32,7 +32,7 @@ static BOOL CALLBACK ChildWindowProc(HWND hwnd, LPARAM lParam)
 		GetWindowText(hwnd, wname, sizeof(wname) / sizeof(TCHAR));
 		wsprintf(ach, szHexFmt, hwnd);
 
-		lvitem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE;
+		lvitem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
 		lvitem.iSubItem = 0;
 		lvitem.pszText = ach;
 		lvitem.iItem = 0;
@@ -50,8 +50,8 @@ static BOOL CALLBACK ChildWindowProc(HWND hwnd, LPARAM lParam)
 static BOOL CALLBACK SiblingWindowProc(HWND hwnd, LPARAM lParam)
 {
 	TCHAR  ach[256];
-	TCHAR  cname[256];
-	TCHAR  wname[256];
+	TCHAR  cname[256] = {0};
+	TCHAR  wname[256] = {0};
 	LVITEM lvitem;
 		
 	//sibling windows must share the same parent
@@ -61,7 +61,7 @@ static BOOL CALLBACK SiblingWindowProc(HWND hwnd, LPARAM lParam)
 		GetWindowText(hwnd, wname, sizeof(wname) / sizeof(TCHAR));
 		wsprintf(ach, szHexFmt, hwnd);
 
-		lvitem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE;
+		lvitem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
 		lvitem.iSubItem = 0;
 		lvitem.pszText = ach;
 		lvitem.iItem = 0;
@@ -93,11 +93,14 @@ void SetWindowInfo(HWND hwnd)
 	ListView_DeleteAllItems(hwndList1);
 	ListView_DeleteAllItems(hwndList2);
 
-	// Get all children of the window
-	EnumChildWindows(hwnd, ChildWindowProc, (LPARAM)hwndList1);
+	if(IsWindow(hwnd))
+	{
+		// Get all children of the window.
+		EnumChildWindows(hwnd, ChildWindowProc, (LPARAM)hwndList1);
 
-	// Get children of it's PARENT (i.e, it's siblings!)
-	EnumChildWindows(GetParent(hwnd), SiblingWindowProc, (LPARAM)hwndList2);
+		// Get children of its parent (its siblings).
+		EnumChildWindows(GetParent(hwnd), SiblingWindowProc, (LPARAM)hwndList2);
+	}
 
 	// Set the Parent hyperlink
 	wsprintf(ach, szHexFmt, GetParent(hwnd));
